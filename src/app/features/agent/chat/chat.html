@@ -1,0 +1,46 @@
+<div class="chat-container">
+
+  <!-- Zone des messages -->
+  <div class="messages" #messagesContainer>
+
+    @if (messages().length === 0) {
+      <div class="empty-state">
+        <p>Posez une question sur vos contrats d'assurance</p>
+      </div>
+    }
+
+    @for (msg of messages(); track $index) {
+      <div class="message" [class]="msg.role">
+        <div class="bubble">
+          <span class="label">{{ msg.role === 'user' ? 'Vous' : 'Agent' }}</span>
+          <p>{{ msg.content }}</p>
+        </div>
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="message assistant">
+        <div class="bubble">
+          <span class="label">Agent</span>
+          <p class="typing">En train de réfléchir…</p>
+        </div>
+      </div>
+    }
+
+  </div>
+
+  <!-- Zone de saisie -->
+  <div class="input-area">
+    <input
+      type="text"
+      [(ngModel)]="userInput"
+      (keyup.enter)="sendMessage()"
+      [disabled]="loading()"
+      placeholder="Ex : contrats en vigueur du client Dupont…"
+    />
+    <button (click)="sendMessage()" [disabled]="loading() || !userInput.trim()">
+      Envoyer
+    </button>
+  </div>
+
+</div>
