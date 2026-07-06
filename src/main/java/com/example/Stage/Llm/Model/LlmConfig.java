@@ -5,4 +5,7 @@ public record LlmConfig(
         double temperature,
         int maxTokens
 ) {
+    public static LlmConfig defaults() {
+        return new LlmConfig("default", 0.3, 1024);
+    }
 }
