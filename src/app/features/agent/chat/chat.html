@@ -5,14 +5,15 @@
 
     @if (messages().length === 0) {
       <div class="empty-state">
-        <p>Posez une question sur vos contrats d'assurance</p>
+        <p>Agent IA Contrats</p>
+        <p class="subtitle">Posez une question sur vos contrats d'assurance</p>
       </div>
     }
 
     @for (msg of messages(); track $index) {
       <div class="message" [class]="msg.role">
         <div class="bubble">
-          <span class="label">{{ msg.role === 'user' ? 'Vous' : 'Agent' }}</span>
+          <span class="label">{{ msg.role === 'user' ? 'Vous' : selectedProvider.toUpperCase() }}</span>
           <p>{{ msg.content }}</p>
         </div>
       </div>
@@ -21,7 +22,7 @@
     @if (loading()) {
       <div class="message assistant">
         <div class="bubble">
-          <span class="label">Agent</span>
+          <span class="label">{{ selectedProvider.toUpperCase() }}</span>
           <p class="typing">En train de réfléchir…</p>
         </div>
       </div>
@@ -29,18 +30,25 @@
 
   </div>
 
-  <!-- Zone de saisie -->
+  <!-- Zone de saisie + sélecteur provider -->
   <div class="input-area">
-    <input
-      type="text"
-      [(ngModel)]="userInput"
-      (keyup.enter)="sendMessage()"
-      [disabled]="loading()"
-      placeholder="Ex : contrats en vigueur du client Dupont…"
-    />
-    <button (click)="sendMessage()" [disabled]="loading() || !userInput.trim()">
-      Envoyer
-    </button>
+    <div class="input-row">
+      <select [(ngModel)]="selectedProvider" class="provider-select" [disabled]="loading()">
+        @for (p of providers(); track p) {
+          <option [value]="p">{{ p }}</option>
+        }
+      </select>
+      <input
+        type="text"
+        [(ngModel)]="userInput"
+        (keyup.enter)="sendMessage()"
+        [disabled]="loading()"
+        placeholder="Ex : contrats en vigueur du client Dupont…"
+      />
+      <button (click)="sendMessage()" [disabled]="loading() || !userInput.trim()">
+        Envoyer
+      </button>
+    </div>
   </div>
 
 </div>
