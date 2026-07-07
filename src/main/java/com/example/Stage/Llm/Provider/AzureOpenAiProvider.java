@@ -19,60 +19,62 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
-public class ClaudeProvider implements LlmService {
+public class AzureOpenAiProvider implements LlmService {
 
-    @Value("${llm.claude.api-key:none}")
+    @Value("${llm.azure.api-key:none}")
     private String apiKey;
+
+    @Value("${llm.azure.endpoint:none}")
+    private String endpoint;
+
+    @Value("${llm.azure.deployment:gpt-4o}")
+    private String deployment;
 
     private final LlmProviderRegistry registry;
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public ClaudeProvider(LlmProviderRegistry registry) {
+    public AzureOpenAiProvider(LlmProviderRegistry registry) {
         this.registry = registry;
     }
 
     @PostConstruct
     public void init() {
-        registry.register("claude", this);
+        registry.register("azure", this);
     }
 
     @Override
     public String ask(List<LlmMessage> messages, LlmConfig config) {
-        if ("none".equals(apiKey)) return "Erreur : clé API Claude non configurée.";
+        if ("none".equals(apiKey)) return "Erreur : clé API Azure non configurée. Demandez les credentials Azure à votre tuteur.";
         try {
-            String systemPrompt = messages.stream()
-                    .filter(m -> "system".equals(m.role()))
-                    .map(LlmMessage::content)
-                    .findFirst().orElse("");
-
             List<Map<String, String>> apiMessages = messages.stream()
-                    .filter(m -> !"system".equals(m.role()))
                     .map(m -> Map.of("role", m.role(), "content", m.content()))
                     .toList();
 
             Map<String, Object> body = Map.of(
-                    "model", "claude-sonnet-4-6",
                     "max_tokens", config.maxTokens(),
-                    "system", systemPrompt,
+                    "temperature", config.temperature(),
                     "messages", apiMessages
             );
 
+            String url = endpoint + "/openai/deployments/" + deployment
+                    + "/chat/completions?api-version=2024-02-15-preview";
+
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.anthropic.com/v1/messages"))
+                    .uri(URI.create(url))
                     .header("Content-Type", "application/json")
-                    .header("x-api-key", apiKey)
-                    .header("anthropic-version", "2023-06-01")
+                    .header("api-key", apiKey)
                     .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body)))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             JsonNode json = mapper.readTree(response.body());
 
-            if (json.has("error")) return "Erreur Claude : " + json.get("error").get("message").asText();
-            return json.get("content").get(0).get("text").asText();
+            if (json.has("error")) return "Erreur Azure : " + json.get("error").get("message").asText();
+            return json.get("choices").get(0).get("message").get("content").asText();
+
         } catch (Exception e) {
-            return "Erreur Claude : " + e.getMessage();
+            return "Erreur Azure : " + e.getMessage();
         }
     }
 

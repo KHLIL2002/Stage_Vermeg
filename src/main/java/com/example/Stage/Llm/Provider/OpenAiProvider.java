@@ -19,60 +19,53 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
-public class ClaudeProvider implements LlmService {
+public class OpenAiProvider implements LlmService {
 
-    @Value("${llm.claude.api-key:none}")
+    @Value("${llm.openai.api-key:none}")
     private String apiKey;
 
     private final LlmProviderRegistry registry;
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public ClaudeProvider(LlmProviderRegistry registry) {
+    public OpenAiProvider(LlmProviderRegistry registry) {
         this.registry = registry;
     }
 
     @PostConstruct
     public void init() {
-        registry.register("claude", this);
+        registry.register("openai", this);
     }
 
     @Override
     public String ask(List<LlmMessage> messages, LlmConfig config) {
-        if ("none".equals(apiKey)) return "Erreur : clé API Claude non configurée.";
+        if ("none".equals(apiKey)) return "Erreur : clé API OpenAI non configurée.";
         try {
-            String systemPrompt = messages.stream()
-                    .filter(m -> "system".equals(m.role()))
-                    .map(LlmMessage::content)
-                    .findFirst().orElse("");
-
             List<Map<String, String>> apiMessages = messages.stream()
-                    .filter(m -> !"system".equals(m.role()))
                     .map(m -> Map.of("role", m.role(), "content", m.content()))
                     .toList();
 
             Map<String, Object> body = Map.of(
-                    "model", "claude-sonnet-4-6",
+                    "model", "gpt-4o",
                     "max_tokens", config.maxTokens(),
-                    "system", systemPrompt,
+                    "temperature", config.temperature(),
                     "messages", apiMessages
             );
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.anthropic.com/v1/messages"))
+                    .uri(URI.create("https://api.openai.com/v1/chat/completions"))
                     .header("Content-Type", "application/json")
-                    .header("x-api-key", apiKey)
-                    .header("anthropic-version", "2023-06-01")
+                    .header("Authorization", "Bearer " + apiKey)
                     .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body)))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             JsonNode json = mapper.readTree(response.body());
 
-            if (json.has("error")) return "Erreur Claude : " + json.get("error").get("message").asText();
-            return json.get("content").get(0).get("text").asText();
+            if (json.has("error")) return "Erreur OpenAI : " + json.get("error").get("message").asText();
+            return json.get("choices").get(0).get("message").get("content").asText();
         } catch (Exception e) {
-            return "Erreur Claude : " + e.getMessage();
+            return "Erreur OpenAI : " + e.getMessage();
         }
     }
 

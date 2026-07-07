@@ -1,10 +1,11 @@
 package com.example.Stage.Llm.Provider;
 
+import com.example.Stage.Llm.LlmProviderRegistry;
 import com.example.Stage.Llm.LlmService;
 import com.example.Stage.Llm.Model.LlmConfig;
 import com.example.Stage.Llm.Model.LlmMessage;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -18,40 +19,62 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
-@ConditionalOnProperty(name = "llm.provider", havingValue = "gemini")
 public class GeminiProvider implements LlmService {
 
-    @Value("${llm.api-key}")
+    @Value("${llm.gemini.api-key:none}")
     private String apiKey;
 
+    private final LlmProviderRegistry registry;
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
 
+    public GeminiProvider(LlmProviderRegistry registry) {
+        this.registry = registry;
+    }
+
+    @PostConstruct
+    public void init() {
+        registry.register("gemini", this);
+    }
+
     @Override
     public String ask(List<LlmMessage> messages, LlmConfig config) {
+        if ("none".equals(apiKey)) return "Erreur : clé API Gemini non configurée.";
         try {
-            List<Map<String, String>> apiMessages = messages.stream()
-                    .map(m -> Map.of("role", m.role(), "content", m.content()))
+            // Convertir les messages au format Gemini natif
+            List<Map<String, Object>> contents = messages.stream()
+                    .filter(m -> !"system".equals(m.role()))
+                    .map(m -> Map.of(
+                            "role", "user".equals(m.role()) ? "user" : "model",
+                            "parts", List.of(Map.of("text", m.content()))
+                    ))
                     .toList();
 
-            Map<String, Object> body = Map.of(
-                    "model", "gemini-2.5-flash",
-                    "messages", apiMessages
-            );
+            // System prompt dans systemInstruction
+            String systemPrompt = messages.stream()
+                    .filter(m -> "system".equals(m.role()))
+                    .map(LlmMessage::content)
+                    .findFirst().orElse("");
+
+            Map<String, Object> body = new java.util.HashMap<>();
+            body.put("contents", contents);
+            if (!systemPrompt.isEmpty()) {
+                body.put("systemInstruction", Map.of(
+                        "parts", List.of(Map.of("text", systemPrompt))
+                ));
+            }
+
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey;
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"))
+                    .uri(URI.create(url))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + apiKey)
                     .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body)))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Debug
             System.out.println("=== Gemini status: " + response.statusCode() + " ===");
-            System.out.println(response.body());
-            System.out.println("===============");
 
             JsonNode json = mapper.readTree(response.body());
 
@@ -59,7 +82,7 @@ public class GeminiProvider implements LlmService {
                 return "Erreur Gemini : " + json.get("error").get("message").asText();
             }
 
-            return json.get("choices").get(0).get("message").get("content").asText();
+            return json.get("candidates").get(0).get("content").get("parts").get(0).get("text").asText();
 
         } catch (Exception e) {
             return "Erreur Gemini : " + e.getMessage();
