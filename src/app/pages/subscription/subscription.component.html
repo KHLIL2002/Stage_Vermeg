@@ -1,0 +1,655 @@
+<div class="sub-page">
+  <div class="sub-container">
+
+    <button type="button" class="back-to-dash" (click)="goToDashboard()">← {{ 'sub.backToDash' | transloco }}</button>
+
+    <!-- ── HEADER ─────────────────────────────────────────────────────── -->
+    <div class="sub-header">
+      <h1>{{ 'sub.title' | transloco }}</h1>
+      <p>{{ 'sub.subtitle' | transloco }}</p>
+    </div>
+
+    <!-- ── SUCCESS ────────────────────────────────────────────────────── -->
+    @if (success()) {
+      <div class="success-card">
+        <span class="success-icon">✅</span>
+        <h2>{{ 'sub.successTitle' | transloco }}</h2>
+        <p>{{ 'sub.successBefore' | transloco }} <strong>PENDING</strong>{{ 'sub.successAfter' | transloco }}</p>
+      </div>
+
+    } @else {
+
+      <!-- ── STEPPER ────────────────────────────────────────────────── -->
+      <div class="stepper">
+        @for (step of steps(); track step.label; let i = $index) {
+          <div
+            class="step-item"
+            [class.active]="i === currentStep()"
+            [class.done]="i < currentStep()"
+            (click)="goToStep(i)"
+          >
+            <div class="step-circle">
+              @if (i < currentStep()) {
+                <span class="step-check">✓</span>
+              } @else {
+                <span class="step-icon">{{ step.icon }}</span>
+              }
+            </div>
+            <span class="step-label">{{ step.label }}</span>
+          </div>
+          @if (i < steps().length - 1) {
+            <div class="step-connector" [class.filled]="i < currentStep()"></div>
+          }
+        }
+      </div>
+
+      <!-- ── FORM CARD ──────────────────────────────────────────────── -->
+      <div class="form-card">
+
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 0 — Produit                                    ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        @if (currentStep() === 0) {
+          <div class="step-panel" [formGroup]="stepProduct">
+            <div class="panel-title">
+              <span class="panel-icon">🛡️</span>
+              <div>
+                <h2>{{ 'sub.p0Title' | transloco }}</h2>
+                <p>{{ 'sub.p0Sub' | transloco }}</p>
+              </div>
+            </div>
+
+            <!-- Visual Product Selector (Table Roulante Visuelle) -->
+            <div class="product-picker-container">
+              <div class="picker-top-bar">
+                <label class="picker-label">{{ 'sub.productSelection' | transloco }} <span class="req">*</span></label>
+                <button type="button" class="btn-open-prod-modal" (click)="openProductModal()">
+                  🔍 {{ 'sub.fullCatalog' | transloco }}
+                </button>
+              </div>
+
+              <!-- Interactive Product Cards Grid (Table Roulante en Cartes) -->
+              <div class="product-cards-grid">
+                @for (prod of products(); track prod.productCode) {
+                  <div 
+                    class="product-card-item"
+                    [class.selected]="stepProduct.value.productCode === prod.productCode"
+                    (click)="selectProduct(prod)"
+                  >
+                    <div class="prod-card-header">
+                      <span class="prod-icon">{{ getProductIcon(prod.productCode, prod.name) }}</span>
+                      <span class="prod-code-chip">#{{ prod.productCode }}</span>
+                    </div>
+                    <div class="prod-card-body">
+                      <h4 class="prod-name">{{ prod.name }}</h4>
+                      <span class="prod-category">{{ getProductCategory(prod.productCode, prod.name) }}</span>
+                    </div>
+                    <div class="prod-card-footer">
+                      <span class="select-indicator">
+                        {{ stepProduct.value.productCode === prod.productCode ? ('✓ ' + ('sub.selected' | transloco)) : ('sub.choose' | transloco) }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Divider between cards and dropdown -->
+             
+
+              <!-- Sleek Dropdown Fallback / Quick Select -->
+              
+            </div>
+
+            <!-- Remaining Product Form Fields (Effective Date, Currency, etc.) -->
+            <div class="fields-grid cols-2 margin-top-24">
+
+              <!-- Commercial Product ID -->
+              
+
+              <!-- Commercial Package ID -->
+             
+
+              <!-- Effective Date -->
+              <div class="form-group">
+                <label>{{ 'sub.effectiveDate' | transloco }} <span class="req">*</span></label>
+                <p-calendar formControlName="effectiveDate" dateFormat="dd/mm/yy"
+                            [showIcon]="true" [readonlyInput]="true" appendTo="body"
+                            inputStyleClass="field" placeholder="jj/mm/aaaa"></p-calendar>
+                @if (stepProduct.get('effectiveDate')?.touched && stepProduct.get('effectiveDate')?.errors?.['required']) {
+                  <span class="field-error">⚠ {{ 'sub.effectiveRequired' | transloco }}</span>
+                }
+              </div>
+
+              <!-- Term Date -->
+              <div class="form-group">
+                <label>{{ 'sub.termDate' | transloco }}</label>
+                <p-calendar formControlName="termDate" dateFormat="dd/mm/yy"
+                            [showIcon]="true" [readonlyInput]="true" appendTo="body"
+                            inputStyleClass="field" placeholder="jj/mm/aaaa"></p-calendar>
+                <span class="field-hint">{{ 'sub.termHint' | transloco }}</span>
+              </div>
+
+              <!-- Currency -->
+              <div class="form-group">
+                <label>{{ 'sub.currency' | transloco }} <span class="req">*</span></label>
+                <p-dropdown formControlName="currency" [options]="currencies"
+                            styleClass="field-dd" appendTo="body"></p-dropdown>
+              </div>
+
+              <!-- Tax Country -->
+              <div class="form-group">
+                <label>{{ 'sub.taxCountry' | transloco }}</label>
+                <p-dropdown formControlName="taxCountry" [options]="countries"
+                            optionLabel="label" optionValue="value"
+                            [placeholder]="'sub.none' | transloco" styleClass="field-dd" appendTo="body"></p-dropdown>
+              </div>
+
+            </div>
+          </div>
+        }
+
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 1 — Titulaire                                  ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 1 — Titulaire                                  ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        @if (currentStep() === 1) {
+          <div class="step-panel" [formGroup]="stepHolder">
+            <div class="panel-title">
+              <span class="panel-icon">👤</span>
+              <div>
+                <h2>{{ 'sub.p1Title' | transloco }}</h2>
+                <p>{{ 'sub.p1Sub' | transloco }}</p>
+              </div>
+            </div>
+
+            <!-- Tiers Selection Controls -->
+            <div class="tier-picker-wrapper">
+              
+              <!-- Selected Tier Preview Card (if tier selected) -->
+              @if (selectedTier(); as tier) {
+                <div class="selected-tier-card">
+                  <div class="tier-card-main">
+                    <div class="tier-avatar" [class.legal]="tier.type === 'LEGAL_ENTITY'">
+                      {{ tier.type === 'LEGAL_ENTITY' ? '🏢' : '👤' }}
+                    </div>
+                    <div class="tier-info">
+                      <div class="tier-title-row">
+                        <span class="tier-name">{{ tier.name }} {{ tier.firstName || '' }}</span>
+                        <span class="td-id">#{{ tier.identifier }}</span>
+                        <span class="type-pill" [class]="tier.type?.toLowerCase()">
+                          {{ (tier.type === 'PHYSICAL_PERSON' ? 'sub.individual' : 'sub.company') | transloco }}
+                        </span>
+                      </div>
+                      <div class="tier-meta-row">
+                        <span class="meta-item">📍 {{ tier.town }} {{ tier.postalCode ? '(' + tier.postalCode + ')' : '' }}</span>
+                        <span class="meta-item">📧 {{ tier.email }}</span>
+                        @if (tier.phone) {
+                          <span class="meta-item">📞 {{ tier.phone }}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tier-card-actions">
+                    <button type="button" class="btn-change-tier" (click)="openTierModal()">
+                      🔍 {{ 'sub.searchChange' | transloco }}
+                    </button>
+                    <button type="button" class="btn-clear-tier" (click)="clearSelectedTier()" [title]="'sub.clearSelection' | transloco">
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <!-- Dual Selection Mode: Quick Table Roulante Dropdown + Annuaire Picker Button -->
+              <div class="tier-selection-bar">
+                
+                <!-- Quick Dropdown (Table Roulante Select) -->
+                
+
+                <!-- Open Table Roulante Modal Button -->
+                <div class="form-group auto-width">
+                  <label>&nbsp;</label>
+                  <button type="button" class="btn-open-modal" (click)="openTierModal()">
+                    <span class="btn-icon">🔍</span> {{ 'sub.chooseTier' | transloco }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Manual / Direct Input fallback -->
+              
+
+            </div>
+
+            
+
+            @if (isTransfer) {
+              <div class="fields-grid cols-1 transfer-section">
+                <div class="form-group">
+                  <label>{{ 'sub.sourcePolicy' | transloco }} <span class="req">*</span></label>
+                  <input
+                    type="text"
+                    formControlName="sourcePolicyNumber"
+                    placeholder="ex : POL-2024-0001"
+                    class="field"
+                  >
+                  <span class="field-hint">{{ 'sub.sourceHint' | transloco }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 2 — Prime & Paiement                          ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        @if (currentStep() === 2) {
+          <div class="step-panel" [formGroup]="stepPremium">
+            <div class="panel-title">
+              <span class="panel-icon">💰</span>
+              <div>
+                <h2>{{ 'sub.p2Title' | transloco }}</h2>
+                <p>{{ 'sub.p2Sub' | transloco }}</p>
+              </div>
+            </div>
+
+            <div class="fields-grid cols-2">
+
+              <!-- Annual Premium -->
+              <div class="form-group">
+                <label>{{ 'sub.annualPremium' | transloco }} <span class="req">*</span></label>
+                <div class="input-prefix-wrap">
+                  <span class="input-prefix">€</span>
+                  <input
+                    type="number"
+                    formControlName="premium"
+                    placeholder="5 000"
+                    class="field field-prefixed"
+                    min="100"
+                  >
+                </div>
+                @if (stepPremium.get('premium')?.touched && stepPremium.get('premium')?.errors?.['required']) {
+                  <span class="field-error">⚠ {{ 'sub.premiumRequired' | transloco }}</span>
+                }
+                @if (stepPremium.get('premium')?.touched && stepPremium.get('premium')?.errors?.['min']) {
+                  <span class="field-error">⚠ {{ 'sub.premiumMinErr' | transloco }}</span>
+                }
+              </div>
+
+              <!-- Premium Type -->
+              <div class="form-group">
+                <label>{{ 'sub.premiumType' | transloco }} <span class="req">*</span></label>
+                <div class="toggle-group">
+                  @for (pt of premiumTypes(); track pt.value) {
+                    <label class="toggle-option" [class.selected]="stepPremium.get('premiumType')?.value === pt.value">
+                      <input type="radio" formControlName="premiumType" [value]="pt.value"> {{ pt.label }}
+                    </label>
+                  }
+                </div>
+              </div>
+
+              <!-- Payment Mode -->
+              <div class="form-group">
+                <label>{{ 'sub.paymentMode' | transloco }}</label>
+                <p-dropdown formControlName="paymentMode" [options]="paymentModes()"
+                            optionLabel="label" optionValue="value"
+                            [placeholder]="'sub.none' | transloco" styleClass="field-dd" appendTo="body"></p-dropdown>
+              </div>
+
+              <!-- Payment Periodicity -->
+              <div class="form-group">
+                <label>{{ 'sub.periodicity' | transloco }}</label>
+                <p-dropdown formControlName="paymentPeriodicity" [options]="periodicities()"
+                            optionLabel="label" optionValue="value" styleClass="field-dd"
+                            appendTo="body"></p-dropdown>
+              </div>
+
+              <!-- Strategy Type -->
+              <div class="form-group">
+                <label>{{ 'sub.strategyType' | transloco }}</label>
+                <p-dropdown formControlName="strategyType" [options]="strategyTypes()"
+                            optionLabel="label" optionValue="value" styleClass="field-dd"
+                            appendTo="body"></p-dropdown>
+              </div>
+
+              <!-- Tax Framework ID -->
+              <div class="form-group">
+                <label>{{ 'sub.taxFramework' | transloco }}</label>
+                <input
+                  type="text"
+                  formControlName="taxFrameworkId"
+                  placeholder="ex : PEA, PERP, VIE"
+                  class="field"
+                >
+                <span class="field-hint">{{ 'sub.taxFrameworkHint' | transloco }}</span>
+              </div>
+
+            </div>
+          </div>
+        }
+
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 3 — Récapitulatif                             ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        @if (currentStep() === 3) {
+          <div class="step-panel">
+            <div class="panel-title">
+              <span class="panel-icon">📋</span>
+              <div>
+                <h2>{{ 'sub.p3Title' | transloco }}</h2>
+                <p>{{ 'sub.p3Sub' | transloco }}</p>
+              </div>
+            </div>
+
+            <div class="summary-grid">
+
+              <!-- Section Produit -->
+              <div class="summary-section">
+                <div class="summary-section-title">
+                  <span>🛡️</span> Produit
+                  <button class="edit-link" (click)="currentStep.set(0)">Modifier</button>
+                </div>
+                <div class="summary-rows">
+                  <div class="summary-row">
+                    <span class="sr-label">Produit</span>
+                    <span class="sr-value">{{ getProductName() }}</span>
+                  </div>
+                  @if (stepProduct.value.commercialProductId) {
+                    <div class="summary-row">
+                      <span class="sr-label">ID Produit Commercial</span>
+                      <span class="sr-value mono">{{ stepProduct.value.commercialProductId }}</span>
+                    </div>
+                  }
+                  @if (stepProduct.value.commercialPackageId) {
+                    <div class="summary-row">
+                      <span class="sr-label">ID Package</span>
+                      <span class="sr-value mono">{{ stepProduct.value.commercialPackageId }}</span>
+                    </div>
+                  }
+                  <div class="summary-row">
+                    <span class="sr-label">Date d'effet</span>
+                    <span class="sr-value">{{ stepProduct.value.effectiveDate | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  @if (stepProduct.value.termDate) {
+                    <div class="summary-row">
+                      <span class="sr-label">Date d'échéance</span>
+                      <span class="sr-value">{{ stepProduct.value.termDate | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                  }
+                  <div class="summary-row">
+                    <span class="sr-label">Devise</span>
+                    <span class="sr-value badge-neutral">{{ stepProduct.value.currency }}</span>
+                  </div>
+                  @if (stepProduct.value.taxCountry) {
+                    <div class="summary-row">
+                      <span class="sr-label">Pays fiscal</span>
+                      <span class="sr-value">{{ stepProduct.value.taxCountry }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Section Titulaire -->
+              <div class="summary-section">
+                <div class="summary-section-title">
+                  <span>👤</span> Titulaire
+                  <button class="edit-link" (click)="currentStep.set(1)">Modifier</button>
+                </div>
+                <div class="summary-rows">
+                  @if (selectedTier(); as tier) {
+                    <div class="summary-row">
+                      <span class="sr-label">Nom du Client</span>
+                      <span class="sr-value">{{ tier.name }} {{ tier.firstName || '' }}</span>
+                    </div>
+                  }
+                  <div class="summary-row">
+                    <span class="sr-label">Identifiant Client</span>
+                    <span class="sr-value mono">#{{ stepHolder.value.holderId }}</span>
+                  </div>
+                  @if (selectedTier(); as tier) {
+                    <div class="summary-row">
+                      <span class="sr-label">Coordonnées</span>
+                      <span class="sr-value">{{ tier.town }} · {{ tier.email }}</span>
+                    </div>
+                  }
+                  <div class="summary-row">
+                    <span class="sr-label">Transfert</span>
+                    <span class="sr-value" [class.badge-warning]="isTransfer" [class.badge-neutral]="!isTransfer">
+                      {{ isTransfer ? 'Oui' : 'Non' }}
+                    </span>
+                  </div>
+                  @if (isTransfer && stepHolder.value.sourcePolicyNumber) {
+                    <div class="summary-row">
+                      <span class="sr-label">Contrat source</span>
+                      <span class="sr-value mono">{{ stepHolder.value.sourcePolicyNumber }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Section Prime -->
+              <div class="summary-section full-width">
+                <div class="summary-section-title">
+                  <span>💰</span> Prime & Paiement
+                  <button class="edit-link" (click)="currentStep.set(2)">Modifier</button>
+                </div>
+                <div class="summary-rows cols-2">
+                  <div class="summary-row">
+                    <span class="sr-label">Prime annuelle</span>
+                    <span class="sr-value amount">{{ stepPremium.value.premium | number:'1.2-2' }} {{ stepProduct.value.currency }}</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="sr-label">Type de prime</span>
+                    <span class="sr-value">
+                      {{ getPremiumTypeLabel(stepPremium.value.premiumType) }}
+                    </span>
+                  </div>
+                  @if (stepPremium.value.paymentMode) {
+                    <div class="summary-row">
+                      <span class="sr-label">Mode de paiement</span>
+                      <span class="sr-value">{{ stepPremium.value.paymentMode }}</span>
+                    </div>
+                  }
+                  @if (stepPremium.value.paymentPeriodicity) {
+                    <div class="summary-row">
+                      <span class="sr-label">Périodicité</span>
+                      <span class="sr-value">{{ stepPremium.value.paymentPeriodicity }}</span>
+                    </div>
+                  }
+                  @if (stepPremium.value.strategyType) {
+                    <div class="summary-row">
+                      <span class="sr-label">Stratégie</span>
+                      <span class="sr-value">{{ stepPremium.value.strategyType }}</span>
+                    </div>
+                  }
+                  @if (stepPremium.value.taxFrameworkId) {
+                    <div class="summary-row">
+                      <span class="sr-label">Cadre fiscal</span>
+                      <span class="sr-value badge-neutral">{{ stepPremium.value.taxFrameworkId }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Status reminder -->
+            <div class="pending-notice">
+              <span>⏳</span>
+              <span>Le contrat sera créé avec le statut <strong>PENDING</strong> et devra être validé.</span>
+            </div>
+
+          </div>
+        }
+
+        <!-- ── NAVIGATION ─────────────────────────────────────── -->
+        <div class="form-actions">
+          @if (currentStep() > 0) {
+            <button type="button" class="btn-cancel" (click)="goBack()">
+              ← {{ 'sub.prev' | transloco }}
+            </button>
+          } @else {
+            <button type="button" class="btn-cancel" (click)="stepProduct.reset()">
+              {{ 'sub.reset' | transloco }}
+            </button>
+          }
+
+          @if (currentStep() < steps().length - 1) {
+            <button type="button" class="btn-submit" (click)="goNext()">
+              {{ 'sub.next' | transloco }} →
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="btn-submit btn-final"
+              [disabled]="loading()"
+              (click)="onSubmit()"
+            >
+              {{ loading() ? ('⏳ ' + ('sub.creating' | transloco)) : ('🚀 ' + ('sub.create' | transloco)) }}
+            </button>
+          }
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- ╔═════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  TABLE ROULANTE MODAL / ANNUAIRE INTERACTIF DES TIERS               ║ -->
+<!-- ╚═════════════════════════════════════════════════════════════════════╝ -->
+@if (showTierModal()) {
+  <div class="modal-backdrop" (click)="closeTierModal()"></div>
+  <div class="modal-dialog tier-modal-dialog">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <span class="modal-eyebrow">{{ 'sub.modalEyebrow' | transloco }}</span>
+        <h2>👥 {{ 'sub.modalTitle' | transloco }}</h2>
+        <p>{{ 'sub.modalSub' | transloco }}</p>
+      </div>
+      <button type="button" class="close-modal-btn" (click)="closeTierModal()" [title]="'sub.close' | transloco">✕</button>
+    </div>
+
+    <!-- Modal Toolbar (Search, Filter, Sort) -->
+    <div class="modal-toolbar">
+      <!-- Search Input -->
+      <div class="modal-search-wrap">
+        <span class="search-ico">🔍</span>
+        <input
+          type="text"
+          class="modal-search-box"
+          [value]="tierSearch()"
+          (input)="tierSearch.set($any($event.target).value)"
+          [placeholder]="'sub.modalSearch' | transloco"
+        >
+        @if (tierSearch()) {
+          <button type="button" class="btn-clear-search" (click)="tierSearch.set('')">✕</button>
+        }
+      </div>
+
+      <!-- Type Filter -->
+      <div class="modal-filter-group">
+        <p-dropdown [options]="modalTypeOptions()" optionLabel="label" optionValue="value"
+                    [ngModel]="tierTypeFilter()" (ngModelChange)="tierTypeFilter.set($event)"
+                    [ngModelOptions]="{ standalone: true }" styleClass="field-dd"
+                    appendTo="body"></p-dropdown>
+      </div>
+
+      <!-- Sort By -->
+      <div class="modal-filter-group">
+        <p-dropdown [options]="modalSortOptions()" optionLabel="label" optionValue="value"
+                    [ngModel]="tierSortBy()" (ngModelChange)="tierSortBy.set($event)"
+                    [ngModelOptions]="{ standalone: true }" styleClass="field-dd"
+                    appendTo="body"></p-dropdown>
+      </div>
+    </div>
+
+    <!-- Counter Chip -->
+    <div class="modal-meta-bar">
+      <span class="count-badge">
+        <strong>{{ filteredModalThirdParties().length }}</strong> {{ 'sub.tiersAvailable' | transloco }}
+      </span>
+      @if (tierSearch() || tierTypeFilter()) {
+        <span class="active-filter-tag">{{ 'sub.activeFilter' | transloco }}</span>
+      }
+    </div>
+
+    <!-- Modal Body: Table Roulante Tiers -->
+    <div class="modal-body table-responsive">
+      <table class="pol-table tier-modal-table">
+        <thead>
+          <tr>
+            <th>Identifiant</th>
+            <th>Nom / Raison Sociale</th>
+            <th>Type</th>
+            <th>Ville / CP</th>
+            <th>Contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tp of filteredModalThirdParties(); track tp.identifier) {
+            <tr
+              class="clickable"
+              [class.selected]="stepHolder.value.holderId === tp.identifier"
+              (click)="selectTier(tp)"
+            >
+              <td>
+                <span class="td-id">#{{ tp.identifier }}</span>
+              </td>
+              <td>
+                <div class="tier-cell-name">
+                  <span class="td-name-main">{{ tp.name }} {{ tp.firstName || '' }}</span>
+                  @if (tp.nationalIdentifier) {
+                    <span class="td-name-sub">CIN/SIREN : {{ tp.nationalIdentifier }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <span class="type-pill" [class]="tp.type?.toLowerCase()">
+                  {{ tp.type === 'PHYSICAL_PERSON' ? 'Particulier' : 'Société' }}
+                </span>
+              </td>
+              <td>
+                <span class="td-town">{{ tp.town }}</span>
+                @if (tp.postalCode) {
+                  <span class="td-zip">({{ tp.postalCode }})</span>
+                }
+              </td>
+              <td class="td-contact">
+                <div>📧 {{ tp.email }}</div>
+                @if (tp.phone) {
+                  <div>📞 {{ tp.phone }}</div>
+                }
+              </td>
+
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="no-results">
+                <div class="empty-picker-state">
+                  <span class="empty-ico">🔍</span>
+                  <p>Aucun tiers ne correspond à votre recherche <strong>"{{ tierSearch() }}"</strong></p>
+                  <button type="button" class="btn-reset-modal-search" (click)="tierSearch.set(''); tierTypeFilter.set('')">
+                    Réinitialiser la recherche
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="closeTierModal()">
+        Fermer
+      </button>
+    </div>
+
+  </div>
+}

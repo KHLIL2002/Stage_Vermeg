@@ -1,0 +1,94 @@
+<div class="tp-page">
+
+  <!-- HEADER -->
+  <div class="tp-header">
+    <div class="title-block">
+      <span class="eyebrow">Gestion Relationnelle</span>
+      <h1>👥 Annuaire des Tiers</h1>
+      <p class="sub">Clients, bénéficiaires et partenaires</p>
+    </div>
+    <div class="count-chip">
+      <span class="num">{{ filteredThirdParties().length }}</span>
+      <span class="txt">Contacts</span>
+    </div>
+  </div>
+
+  <!-- INSIGHT STRIP -->
+  <div class="insight-strip">
+    <div class="insight-card">
+      <div class="ic-icon indigo">👤</div>
+      <div class="ic-data">
+        <label>Personnes Physiques</label>
+        <span class="ic-value">{{ physicalCount() }}</span>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="ic-icon violet">🏢</div>
+      <div class="ic-data">
+        <label>Personnes Morales</label>
+        <span class="ic-value">{{ legalCount() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text"
+             class="search-box"
+             [ngModel]="searchText()"
+             (ngModelChange)="updateSearch($event)"
+             placeholder="Chercher par nom, ville, identifiant..." />
+    </div>
+    <select class="filter-box"
+            [ngModel]="typeFilter()"
+            (ngModelChange)="updateType($event)">
+      <option value="">Tous les types</option>
+      <option value="PHYSICAL_PERSON">Particuliers</option>
+      <option value="LEGAL_ENTITY">Entreprises</option>
+    </select>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-box">
+    <table class="tp-table">
+      <thead>
+        <tr>
+          <th>Identifiant</th>
+          <th>Nom Complet</th>
+          <th>Type</th>
+          <th>Localisation</th>
+          <th>Contact</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (tp of filteredThirdParties(); track tp.id) {
+          <tr>
+            <td><span class="td-id">{{ tp.identifier }}</span></td>
+            <td>
+              <span class="td-name-main">{{ tp.name }} {{ tp.firstName || '' }}</span>
+              <span class="td-name-sub">{{ tp.nationalIdentifier || 'N/A' }}</span>
+            </td>
+            <td>
+              <span class="type-pill" [class]="tp.type.toLowerCase()">
+                {{ tp.type === 'PHYSICAL_PERSON' ? 'Individu' : 'Entreprise' }}
+              </span>
+            </td>
+            <td>
+              <span class="td-town">{{ tp.town }}</span>
+              <span class="td-zip">{{ tp.postalCode }}</span>
+            </td>
+            <td class="td-contact">
+              <div>📧 {{ tp.email }}</div>
+              <div>📞 {{ tp.phone }}</div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="no-results">Aucun tiers trouvé.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>

@@ -1,0 +1,65 @@
+<div class="cov-page">
+
+  <!-- HEADER -->
+  <div class="cov-header">
+    <div class="title-block">
+      <span class="eyebrow">Analyse des Risques</span>
+      <h1>🛡️ Garanties &amp; Risques</h1>
+      <p class="sub">Analyse des couvertures et des capitaux assurés</p>
+    </div>
+    <div class="count-chip">
+      <span class="num">{{ filteredCoverages().length }}</span>
+      <span class="txt">Garanties</span>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text"
+             class="search-box"
+             [ngModel]="searchText()"
+             (ngModelChange)="updateSearch($event)"
+             placeholder="Rechercher une garantie, un ID ou une police..." />
+    </div>
+    <select class="filter-box"
+            [ngModel]="typeFilter()"
+            (ngModelChange)="updateType($event)">
+      <option value="">Tous les types</option>
+      <option value="DEATH">Décès</option>
+      <option value="SAVINGS">Épargne</option>
+      <option value="UNIT_LINKED">Unités de Compte</option>
+      <option value="DISABILITY">Invalidité</option>
+    </select>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-box">
+    <table class="cov-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Libellé Garantie</th>
+          <th>Type</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of filteredCoverages(); track c.id) {
+          <tr>
+            <td><span class="td-id">{{ c.identifier }}</span></td>
+            <td><span class="td-label">{{ c.label }}</span></td>
+            <td><span class="type-tag">{{ c.coverageType }}</span></td>
+            <td>
+              <span class="s-badge" [class]="c.status.toLowerCase()">{{ c.status }}</span>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="no-results">Aucune garantie trouvée pour ces critères.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>

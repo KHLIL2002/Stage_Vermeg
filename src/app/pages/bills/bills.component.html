@@ -1,0 +1,95 @@
+<div class="bills-page">
+
+  <!-- HEADER -->
+  <div class="bills-header">
+    <div class="title-block">
+      <span class="eyebrow">Gestion Financière</span>
+      <h1>💶 Facturation</h1>
+      <p class="sub">Suivi des encaissements et des impayés</p>
+    </div>
+    <div class="count-chip">
+      <span class="num">{{ filteredBills().length }}</span>
+      <span class="txt">Factures</span>
+    </div>
+  </div>
+
+  <!-- FINANCE CARDS -->
+  <div class="finance-strip">
+    <div class="finance-card unpaid">
+      <div class="fc-icon">⚠️</div>
+      <div class="fc-data">
+        <span class="fc-label">Total Impayé</span>
+        <span class="fc-value">{{ totalUnpaid() | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+    <div class="finance-card pending">
+      <div class="fc-icon">⏳</div>
+      <div class="fc-data">
+        <span class="fc-label">En attente</span>
+        <span class="fc-value">{{ totalPending() | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+    <div class="finance-card info">
+      <div class="fc-icon">📊</div>
+      <div class="fc-data">
+        <span class="fc-label">Flux filtré</span>
+        <span class="fc-value">{{ (totalUnpaid() + totalPending()) | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text"
+             class="search-box"
+             [ngModel]="searchText()"
+             (ngModelChange)="onTextChange($event)"
+             placeholder="Rechercher par N° facture ou police..." />
+    </div>
+    <select class="filter-box"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="onStatusChange($event)">
+      <option value="">Tous les statuts</option>
+      <option value="PAID">Payée</option>
+      <option value="PENDING">En attente</option>
+      <option value="UNPAID">Impayée</option>
+    </select>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-box">
+    <table class="bills-table">
+      <thead>
+        <tr>
+          <th>N° Facture</th>
+          <th>Réf. Police</th>
+          <th>Montant</th>
+          <th>Payé</th>
+          <th>Échéance</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (b of filteredBills(); track b.id) {
+          <tr>
+            <td><span class="td-id">{{ b.identifier }}</span></td>
+            <td><span class="td-ref">#{{ b.policyNumber }}</span></td>
+            <td><span class="td-amount">{{ b.billAmount | number:'1.2-2' }} {{ b.currency }}</span></td>
+            <td class="td-paid" [class.partial]="b.paidAmount > 0 && b.paidAmount < b.billAmount">
+              {{ b.paidAmount | number:'1.2-2' }} {{ b.currency }}
+            </td>
+            <td>{{ b.effectiveDate }}</td>
+            <td>
+              <span class="s-badge" [class]="b.status.toLowerCase()">{{ b.status }}</span>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="no-results">Aucune facture ne correspond à ces critères.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>

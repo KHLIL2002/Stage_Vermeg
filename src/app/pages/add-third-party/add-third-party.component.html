@@ -1,0 +1,429 @@
+<div class="tp-page">
+  <div class="tp-container">
+
+    <button type="button" class="back-to-dash" (click)="goToDashboard()">← Retour au tableau de bord</button>
+
+    <!-- ── HEADER ─────────────────────────────────────────────────────── -->
+    <div class="tp-header">
+      <h1>Nouveau Tiers</h1>
+      <p>Complétez les informations pour créer un nouveau client ou tiers (Personne physique ou morale).</p>
+    </div>
+
+    <!-- ── SUCCESS ────────────────────────────────────────────────────── -->
+    @if (success()) {
+      <div class="success-card">
+        <span class="success-icon">✅</span>
+        <h2>Tiers créé avec succès !</h2>
+        <p>Le nouveau tiers a été enregistré dans le référentiel Solife. Redirection en cours…</p>
+      </div>
+
+    } @else {
+
+      <!-- ── STEPPER ────────────────────────────────────────────────── -->
+      <div class="stepper">
+        @for (step of steps; track step.label; let i = $index) {
+          <div
+            class="step-item"
+            [class.active]="i === currentStep()"
+            [class.done]="i < currentStep()"
+            (click)="goToStep(i)"
+          >
+            <div class="step-circle">
+              @if (i < currentStep()) {
+                <span class="step-check">✓</span>
+              } @else {
+                <span class="step-icon">{{ step.icon }}</span>
+              }
+            </div>
+            <span class="step-label">{{ step.label }}</span>
+          </div>
+          @if (i < steps.length - 1) {
+            <div class="step-connector" [class.filled]="i < currentStep()"></div>
+          }
+        }
+      </div>
+
+      <!-- ── FORM CARD ──────────────────────────────────────────────── -->
+      <div class="form-card">
+
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 0 — Type & Identité                            ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        @if (currentStep() === 0) {
+          <div class="step-panel" [formGroup]="stepIdentity">
+            <div class="panel-title">
+              <span class="panel-icon">👥</span>
+              <div>
+                <h2>Type & Identité du Tiers</h2>
+                <p>Définissez le type de tiers et ses identifiants principaux.</p>
+              </div>
+            </div>
+
+            <!-- Type Choice (Radio Pills) -->
+            <div class="fields-grid cols-1">
+              <div class="form-group">
+                <label>Type de Tiers <span class="req">*</span></label>
+                <div class="toggle-group">
+                  <label class="toggle-option" [class.selected]="stepIdentity.get('type')?.value === 'PHYSICAL_PERSON'">
+                    <input type="radio" formControlName="type" value="PHYSICAL_PERSON"> 👤 Personne Physique
+                  </label>
+                  <label class="toggle-option" [class.selected]="stepIdentity.get('type')?.value === 'LEGAL_ENTITY'">
+                    <input type="radio" formControlName="type" value="LEGAL_ENTITY"> 🏢 Personne Morale (Société)
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="fields-grid cols-2">
+
+              <!-- Main Name -->
+              <div class="form-group">
+                <label>{{ isPhysicalPerson ? 'Nom de famille' : 'Raison sociale' }} <span class="req">*</span></label>
+                <input
+                  type="text"
+                  formControlName="name"
+                  [placeholder]="isPhysicalPerson ? 'ex : Dupont' : 'ex : Acme Insurance SA'"
+                  class="field"
+                >
+                @if (stepIdentity.get('name')?.touched && stepIdentity.get('name')?.errors?.['required']) {
+                  <span class="field-error">⚠ Ce champ est obligatoire</span>
+                }
+              </div>
+
+              <!-- National Identifier -->
+              <div class="form-group">
+                <label>{{ isPhysicalPerson ? 'N° CIN / Sécurité Sociale' : 'N° SIREN / Registre' }} <span class="req">*</span></label>
+                <input
+                  type="text"
+                  formControlName="nationalIdentifier"
+                  placeholder="ex : 1 85 06 75 123 456"
+                  class="field"
+                >
+                @if (stepIdentity.get('nationalIdentifier')?.touched && stepIdentity.get('nationalIdentifier')?.errors?.['required']) {
+                  <span class="field-error">⚠ {{ isPhysicalPerson ? 'Le CIN est obligatoire' : 'Le SIREN est obligatoire' }}</span>
+                }
+              </div>
+
+              <!-- National Identifier Country -->
+              <div class="form-group">
+                <label>Pays de l'identifiant national</label>
+                <p-dropdown formControlName="nationalIdentifierCountry" [options]="countries"
+                            optionLabel="label" optionValue="value" styleClass="field-dd"
+                            appendTo="body"></p-dropdown>
+              </div>
+
+            </div>
+          </div>
+        }
+
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 1 — Informations Personne / Société            ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        @if (currentStep() === 1) {
+          <div class="step-panel" [formGroup]="stepDetails">
+            <div class="panel-title">
+              <span class="panel-icon">📋</span>
+              <div>
+                <h2>{{ isPhysicalPerson ? 'État civil de la personne' : 'Renseignements de la société' }}</h2>
+                <p>{{ isPhysicalPerson ? 'Saisissez les détails de la personne physique.' : 'Définissez la structure et l\'immatriculation.' }}</p>
+              </div>
+            </div>
+
+            @if (isPhysicalPerson) {
+              <!-- Physical Person Form -->
+              <div class="fields-grid cols-2">
+                <div class="form-group">
+                  <label>Prénom <span class="req">*</span></label>
+                  <input type="text" formControlName="firstName" placeholder="ex : Jean" class="field">
+                  @if (stepDetails.get('firstName')?.touched && stepDetails.get('firstName')?.errors?.['required']) {
+                    <span class="field-error">⚠ Le prénom est obligatoire</span>
+                  }
+                </div>
+
+                <div class="form-group">
+                  <label>Deuxième prénom</label>
+                  <input type="text" formControlName="secondName" placeholder="ex : Marc" class="field">
+                </div>
+
+                <div class="form-group">
+                  <label>Troisième prénom</label>
+                  <input type="text" formControlName="thirdName" placeholder="ex : Pierre" class="field">
+                </div>
+
+                <div class="form-group">
+                  <label>Genre</label>
+                  <div class="toggle-group">
+                    @for (g of genders; track g.value) {
+                      <label class="toggle-option" [class.selected]="stepDetails.get('gender')?.value === g.value">
+                        <input type="radio" formControlName="gender" [value]="g.value"> {{ g.label }}
+                      </label>
+                    }
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Date de naissance</label>
+                  <p-calendar formControlName="birthDate" dateFormat="dd/mm/yy"
+                              [showIcon]="true" [maxDate]="today" [readonlyInput]="true"
+                              appendTo="body" inputStyleClass="field"
+                              placeholder="jj/mm/aaaa"></p-calendar>
+                </div>
+              </div>
+
+            } @else {
+              <!-- Legal Entity Form -->
+              <div class="fields-grid cols-2">
+                <div class="form-group">
+                  <label>Forme Juridique</label>
+                  <p-dropdown formControlName="legalForm" [options]="legalForms"
+                              optionLabel="label" optionValue="value" styleClass="field-dd"
+                              appendTo="body"></p-dropdown>
+                </div>
+
+                <div class="form-group">
+                  <label>Registre du Commerce (RCS)</label>
+                  <input type="text" formControlName="tradeRegister" placeholder="ex : RCS Paris B 123 456 789" class="field">
+                </div>
+
+                <div class="form-group">
+                  <label>Date de création</label>
+                  <input type="date" formControlName="creationDate" class="field">
+                </div>
+
+                <div class="form-group">
+                  <label>Code Activité (APE / NAF)</label>
+                  <input type="text" formControlName="economicActivityCode" placeholder="ex : 65.11Z" class="field">
+                </div>
+              </div>
+            }
+
+          </div>
+        }
+
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 2 — Coordonnées & Adresse                      ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        @if (currentStep() === 2) {
+          <div class="step-panel" [formGroup]="stepContact">
+            <div class="panel-title">
+              <span class="panel-icon">📍</span>
+              <div>
+                <h2>Coordonnées & Adresse Légale</h2>
+                <p>Adresse postale, email et téléphone du tiers.</p>
+              </div>
+            </div>
+
+            <div class="fields-grid cols-2">
+
+              <div class="form-group">
+                <label>Rue / Adresse <span class="req">*</span></label>
+                <input type="text" formControlName="street" placeholder="ex : Avenue des Champs-Élysées" class="field">
+                @if (stepContact.get('street')?.touched && stepContact.get('street')?.errors?.['required']) {
+                  <span class="field-error">⚠ La rue est obligatoire</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label>Numéro de rue</label>
+                <input type="text" formControlName="streetNumber" placeholder="ex : 42" class="field">
+              </div>
+
+              <div class="form-group">
+                <label>Code Postal <span class="req">*</span></label>
+                <input type="text" formControlName="postalCode" placeholder="ex : 75008" class="field">
+                @if (stepContact.get('postalCode')?.touched && stepContact.get('postalCode')?.errors?.['required']) {
+                  <span class="field-error">⚠ Le code postal est obligatoire</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label>Ville / Commune <span class="req">*</span></label>
+                <input type="text" formControlName="town" placeholder="ex : Paris" class="field">
+                @if (stepContact.get('town')?.touched && stepContact.get('town')?.errors?.['required']) {
+                  <span class="field-error">⚠ La ville est obligatoire</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label>Pays <span class="req">*</span></label>
+                <p-dropdown formControlName="country" [options]="countries"
+                            optionLabel="label" optionValue="value" styleClass="field-dd"
+                            appendTo="body"></p-dropdown>
+              </div>
+
+              <div class="form-group">
+                <label>Appartement / Bâtiment</label>
+                <input type="text" formControlName="appartmentNumber" placeholder="ex : Bâtiment B, Apt 12" class="field">
+              </div>
+
+              <div class="form-group">
+                <label>Adresse Email <span class="req">*</span></label>
+                <input type="email" formControlName="email" placeholder="ex : contact@domaine.com" class="field">
+                @if (stepContact.get('email')?.touched && stepContact.get('email')?.errors?.['required']) {
+                  <span class="field-error">⚠ L'email est obligatoire</span>
+                }
+                @if (stepContact.get('email')?.touched && stepContact.get('email')?.errors?.['email']) {
+                  <span class="field-error">⚠ Format email invalide</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label>Téléphone <span class="req">*</span></label>
+                <input type="text" formControlName="phone" placeholder="ex : +33 6 12 34 56 78" class="field">
+                @if (stepContact.get('phone')?.touched && stepContact.get('phone')?.errors?.['required']) {
+                  <span class="field-error">⚠ Le téléphone est obligatoire</span>
+                }
+              </div>
+
+            </div>
+          </div>
+        }
+
+        <!-- ╔══════════════════════════════════════════════════════╗ -->
+        <!-- ║  STEP 3 — Récapitulatif                             ║ -->
+        <!-- ╚══════════════════════════════════════════════════════╝ -->
+        @if (currentStep() === 3) {
+          <div class="step-panel">
+            <div class="panel-title">
+              <span class="panel-icon">📋</span>
+              <div>
+                <h2>Récapitulatif des données</h2>
+                <p>Vérifiez l'exactitude des données avant la création.</p>
+              </div>
+            </div>
+
+            <div class="summary-grid">
+
+              <!-- Section Type & Identité -->
+              <div class="summary-section">
+                <div class="summary-section-title">
+                  <span>👥</span> Type & Identité
+                  <button class="edit-link" (click)="currentStep.set(0)">Modifier</button>
+                </div>
+                <div class="summary-rows">
+                  <div class="summary-row">
+                    <span class="sr-label">Type</span>
+                    <span class="sr-value badge-neutral">
+                      {{ isPhysicalPerson ? 'Personne Physique' : 'Personne Morale' }}
+                    </span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="sr-label">Identifiant Tiers</span>
+                    <span class="sr-value mono">Attribué automatiquement</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="sr-label">{{ isPhysicalPerson ? 'Nom' : 'Raison Sociale' }}</span>
+                    <span class="sr-value">{{ stepIdentity.value.name }}</span>
+                  </div>
+                  @if (stepIdentity.value.nationalIdentifier) {
+                    <div class="summary-row">
+                      <span class="sr-label">N° Identification Nat.</span>
+                      <span class="sr-value mono">{{ stepIdentity.value.nationalIdentifier }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Section Informations -->
+              <div class="summary-section">
+                <div class="summary-section-title">
+                  <span>📋</span> {{ isPhysicalPerson ? 'État Civil' : 'Société' }}
+                  <button class="edit-link" (click)="currentStep.set(1)">Modifier</button>
+                </div>
+                <div class="summary-rows">
+                  @if (isPhysicalPerson) {
+                    @if (stepDetails.value.firstName) {
+                      <div class="summary-row">
+                        <span class="sr-label">Prénom</span>
+                        <span class="sr-value">{{ stepDetails.value.firstName }}</span>
+                      </div>
+                    }
+                    @if (stepDetails.value.birthDate) {
+                      <div class="summary-row">
+                        <span class="sr-label">Date de naissance</span>
+                        <span class="sr-value">{{ stepDetails.value.birthDate | date:'dd/MM/yyyy' }}</span>
+                      </div>
+                    }
+                    <div class="summary-row">
+                      <span class="sr-label">Genre</span>
+                      <span class="sr-value">{{ stepDetails.value.gender === 'MALE' ? 'Homme' : 'Femme' }}</span>
+                    </div>
+                  } @else {
+                    <div class="summary-row">
+                      <span class="sr-label">Forme Juridique</span>
+                      <span class="sr-value">{{ stepDetails.value.legalForm }}</span>
+                    </div>
+                    @if (stepDetails.value.tradeRegister) {
+                      <div class="summary-row">
+                        <span class="sr-label">Registre Commerce</span>
+                        <span class="sr-value mono">{{ stepDetails.value.tradeRegister }}</span>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+
+              <!-- Section Coordonnées -->
+              <div class="summary-section full-width">
+                <div class="summary-section-title">
+                  <span>📍</span> Coordonnées & Contact
+                  <button class="edit-link" (click)="currentStep.set(2)">Modifier</button>
+                </div>
+                <div class="summary-rows cols-2">
+                  <div class="summary-row">
+                    <span class="sr-label">Adresse</span>
+                    <span class="sr-value">{{ stepContact.value.streetNumber }} {{ stepContact.value.street }}</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="sr-label">Code Postal / Ville</span>
+                    <span class="sr-value">{{ stepContact.value.postalCode }} {{ stepContact.value.town }} ({{ stepContact.value.country }})</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="sr-label">Email</span>
+                    <span class="sr-value mono">{{ stepContact.value.email }}</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="sr-label">Téléphone</span>
+                    <span class="sr-value mono">{{ stepContact.value.phone }}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        }
+
+        <!-- ── NAVIGATION ─────────────────────────────────────── -->
+        <div class="form-actions">
+          @if (currentStep() > 0) {
+            <button type="button" class="btn-cancel" (click)="goBack()">
+              ← Précédent
+            </button>
+          } @else {
+            <button type="button" class="btn-cancel" (click)="stepIdentity.reset({ type: 'PHYSICAL_PERSON', nationalIdentifierCountry: 'FR' })">
+              Réinitialiser
+            </button>
+          }
+
+          @if (currentStep() < steps.length - 1) {
+            <button type="button" class="btn-submit" (click)="goNext()">
+              Suivant →
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="btn-submit btn-final"
+              [disabled]="loading()"
+              (click)="onSubmit()"
+            >
+              {{ loading() ? '⏳ Enregistrement…' : '🚀 Créer le Tiers' }}
+            </button>
+          }
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>

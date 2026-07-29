@@ -3,6 +3,7 @@
   <!-- Zone des messages -->
   <div class="messages" #messagesContainer>
 
+    <!-- État vide : affiché si aucun message -->
     @if (messages().length === 0) {
       <div class="empty-state">
         <p>Agent IA Contrats</p>
@@ -10,34 +11,43 @@
       </div>
     }
 
+    <!-- Boucle sur les messages -->
     @for (msg of messages(); track $index) {
       <div class="message" [class]="msg.role">
         <div class="bubble">
-          <span class="label">{{ msg.role === 'user' ? 'Vous' : selectedProvider.toUpperCase() }}</span>
-          <p>{{ msg.content }}</p>
+          <span class="label">
+            {{ msg.role === 'user' ? 'Vous' : selectedProvider.toUpperCase() }}
+          </span>
+          
+          <div class="bubble-content">
+            <!-- Utilisation du composant markdown pour un rendu propre des tableaux et listes -->
+            <markdown [data]="msg.content"></markdown>
+          </div>
         </div>
       </div>
     }
 
+    <!-- Indicateur de chargement / réflexion de l'IA -->
     @if (loading()) {
       <div class="message assistant">
         <div class="bubble">
           <span class="label">{{ selectedProvider.toUpperCase() }}</span>
-          <p class="typing">En train de réfléchir…</p>
+          <div class="bubble-content">
+            <p class="typing">En train de réfléchir…</p>
+          </div>
         </div>
       </div>
     }
 
   </div>
 
-  <!-- Zone de saisie + sélecteur provider -->
+  <!-- Zone de saisie + sélecteur de modèle (Provider) -->
   <div class="input-area">
     <div class="input-row">
-      <select [(ngModel)]="selectedProvider" class="provider-select" [disabled]="loading()">
-        @for (p of providers(); track p) {
-          <option [value]="p">{{ p }}</option>
-        }
-      </select>
+      <p-dropdown [options]="providerOptions()" optionLabel="label" optionValue="value"
+                  [(ngModel)]="selectedProvider" [disabled]="loading()"
+                  styleClass="provider-dd" appendTo="body"></p-dropdown>
+      
       <input
         type="text"
         [(ngModel)]="userInput"
@@ -45,6 +55,7 @@
         [disabled]="loading()"
         placeholder="Ex : contrats en vigueur du client Dupont…"
       />
+      
       <button (click)="sendMessage()" [disabled]="loading() || !userInput.trim()">
         Envoyer
       </button>

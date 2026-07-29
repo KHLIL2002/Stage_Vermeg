@@ -1,0 +1,94 @@
+<div class="policies-page">
+
+  <!-- HEADER -->
+  <div class="policies-header">
+    <div class="title-block">
+      <span class="eyebrow">Portefeuille Assurance</span>
+      <h1>📄 Gestion des Polices</h1>
+      <p class="sub">Consultez et filtrez les contrats de votre portefeuille</p>
+    </div>
+    <div class="header-right">
+      <button class="btn-new" (click)="goToSubscription()">
+        <span class="plus">＋</span> Nouvelle Souscription
+      </button>
+      <div class="count-chip">
+        <span class="num">{{ filtered().length }}</span>
+        <span class="txt">Contrats</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text"
+             class="search-box"
+             [ngModel]="searchText()"
+             (ngModelChange)="onTextChange($event)"
+             placeholder="Rechercher un numéro, un nom ou un produit..." />
+    </div>
+    <select class="filter-box"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="onStatusChange($event)">
+      <option value="">Tous les statuts</option>
+      <option value="ACTIVE">Actif</option>
+      <option value="CANCELLED">Annulé</option>
+      <option value="SUSPENDED">Suspendu</option>
+      <option value="PENDING">En attente</option>
+    </select>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-box">
+    <table class="pol-table">
+      <thead>
+        <tr>
+          <th>N° Police</th>
+          <th>Produit</th>
+          <th>Statut</th>
+          <th>Souscripteur</th>
+          <th>Prime Annuelle</th>
+          <th>Date d'effet</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of filtered(); track p.id) {
+          <tr (click)="selectPolicy(p)"
+              [class.selected]="selectedPolicy()?.id === p.id">
+            <td><span class="td-id">#{{ p.policyNumber }}</span></td>
+            <td><span class="td-product">{{ p.product?.name }}</span></td>
+            <td>
+              <span class="s-badge" [class]="p.status.toLowerCase()">
+                {{ p.status }}
+              </span>
+            </td>
+            <td>{{ p.holder?.name }} {{ p.holder?.firstName }}</td>
+            <td><span class="td-amount">{{ p.annualPremium | number:'1.0-0' }} €</span></td>
+            <td>{{ p.effectiveDate }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="no-results">Aucun contrat trouvé.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SIDE DRAWER (legacy fallback) -->
+  @if (selectedPolicy()) {
+    <div class="glass-overlay" (click)="clearSelection()"></div>
+    <div class="side-drawer">
+      <div class="drawer-header">
+        <h2>Détails du Contrat</h2>
+        <button (click)="clearSelection()" class="close-btn">✕</button>
+      </div>
+      <div class="drawer-body">
+        <div style="background:#f8fafc;padding:16px;border-radius:12px;margin-bottom:16px;">
+          <p style="font-size:12px;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">Numéro de police</p>
+          <p style="font-weight:700;font-size:16px;">#{{ selectedPolicy().policyNumber }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

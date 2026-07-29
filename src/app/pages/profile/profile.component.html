@@ -1,0 +1,218 @@
+<div class="profile-page">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <a routerLink="/" class="back-link">
+        <span class="arrow">←</span> Retour au Tableau de bord
+      </a>
+      <h1 class="page-title">Mon Profil Utilisateur</h1>
+      <p class="page-sub">Gérez vos informations personnelles et vos paramètres de sécurité.</p>
+    </div>
+  </header>
+
+  <!-- User Overview Banner Card -->
+  <div class="user-hero-card">
+    <div class="user-avatar-large">
+      {{ userInfo()?.initials || 'U' }}
+    </div>
+
+    <div class="user-hero-details">
+      <div class="name-row">
+        <h2 class="user-full-name">{{ userInfo()?.name || 'Utilisateur' }}</h2>
+        <span class="role-pill">{{ userInfo()?.role || 'Utilisateur Connecté' }}</span>
+      </div>
+
+      <div class="meta-row">
+        <span class="meta-item">
+          <span class="icon">👤</span> @{{ userInfo()?.username || 'utilisateur' }}
+        </span>
+        @if (userInfo()?.email) {
+          <span class="meta-item">
+            <span class="icon">✉️</span> {{ userInfo()?.email }}
+          </span>
+        }
+        <span class="meta-item status-item">
+          <span class="status-dot"></span> Compte Actif
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="profile-grid">
+
+    <!-- Column 1: Personal Infos Form -->
+    <div class="profile-card">
+      <div class="card-title-row">
+        <div class="card-icon blue-bg">👤</div>
+        <div class="card-title-text">
+          <h3>Informations Personnelles</h3>
+          <p>Mettez à jour vos informations de profil public.</p>
+        </div>
+      </div>
+
+      @if (profileSuccessMsg()) {
+        <div class="alert alert-success">
+          <span class="alert-ico">✅</span> {{ profileSuccessMsg() }}
+        </div>
+      }
+
+      @if (profileErrorMsg()) {
+        <div class="alert alert-danger">
+          <span class="alert-ico">⚠️</span> {{ profileErrorMsg() }}
+        </div>
+      }
+
+      <form (submit)="$event.preventDefault(); saveProfile()" class="profile-form">
+        
+        <div class="form-row">
+          <div class="form-field">
+            <label for="firstName">Prénom</label>
+            <input
+              id="firstName"
+              type="text"
+              class="form-control"
+              placeholder="Saisissez votre prénom"
+              [value]="firstName()"
+              (input)="firstName.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="lastName">Nom</label>
+            <input
+              id="lastName"
+              type="text"
+              class="form-control"
+              placeholder="Saisissez votre nom"
+              [value]="lastName()"
+              (input)="lastName.set($any($event.target).value)"
+            />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="emailInput">Adresse Email</label>
+          <input
+            id="emailInput"
+            type="email"
+            class="form-control"
+            placeholder="votre.email@domaine.com"
+            [value]="email()"
+            (input)="email.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-field">
+          <label>Nom d'utilisateur</label>
+          <input
+            type="text"
+            class="form-control read-only"
+            [value]="userInfo()?.username"
+            disabled
+          />
+          <span class="field-hint">Le nom d'utilisateur unique ne peut pas être modifié.</span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save" [disabled]="isSavingProfile()">
+            @if (isSavingProfile()) {
+              <span class="spinner"></span> Enregistrement...
+            } @else {
+              <span>Enregistrer les modifications</span>
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Column 2: Security & Password Update -->
+    <div class="profile-card">
+      <div class="card-title-row">
+        <div class="card-icon purple-bg">🔒</div>
+        <div class="card-title-text">
+          <h3>Sécurité & Mot de Passe</h3>
+          <p>Modifiez votre mot de passe pour sécuriser votre compte.</p>
+        </div>
+      </div>
+
+      @if (passwordSuccessMsg()) {
+        <div class="alert alert-success">
+          <span class="alert-ico">✅</span> {{ passwordSuccessMsg() }}
+        </div>
+      }
+
+      @if (passwordErrorMsg()) {
+        <div class="alert alert-danger">
+          <span class="alert-ico">⚠️</span> {{ passwordErrorMsg() }}
+        </div>
+      }
+
+      <form (submit)="$event.preventDefault(); savePassword()" class="profile-form">
+        
+        <div class="form-field">
+          <label for="currentPassword">Mot de passe actuel</label>
+          <div class="input-pw-wrap">
+            <input
+              id="currentPassword"
+              [type]="showCurrentPw() ? 'text' : 'password'"
+              class="form-control"
+              placeholder="••••••••••••"
+              [value]="currentPassword()"
+              (input)="currentPassword.set($any($event.target).value)"
+            />
+            <button type="button" class="btn-toggle-pw" (click)="toggleCurrentPw()">
+              {{ showCurrentPw() ? '👁️' : '🔒' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="newPassword">Nouveau mot de passe</label>
+          <div class="input-pw-wrap">
+            <input
+              id="newPassword"
+              [type]="showNewPw() ? 'text' : 'password'"
+              class="form-control"
+              placeholder="Minimum 6 caractères"
+              [value]="newPassword()"
+              (input)="newPassword.set($any($event.target).value)"
+            />
+            <button type="button" class="btn-toggle-pw" (click)="toggleNewPw()">
+              {{ showNewPw() ? '👁️' : '🔒' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="confirmPassword">Confirmer le nouveau mot de passe</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            class="form-control"
+            placeholder="Répétez le nouveau mot de passe"
+            [value]="confirmPassword()"
+            (input)="confirmPassword.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save btn-purple" [disabled]="isSavingPassword()">
+            @if (isSavingPassword()) {
+              <span class="spinner"></span> Modification...
+            } @else {
+              <span>Mettre à jour le mot de passe</span>
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+
+  
+
+</div>

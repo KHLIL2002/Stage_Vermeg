@@ -1,0 +1,124 @@
+<div class="detail-page">
+
+  <div class="detail-topbar">
+    <button class="back-link" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Retour aux tiers
+    </button>
+  </div>
+
+  @if (tier(); as t) {
+
+    <!-- PROFILE BANNER -->
+    <header class="tp-banner">
+      <div class="avatar-lg" [class.legal]="t.type === 'LEGAL_ENTITY'">{{ initials(t) }}</div>
+      <div class="banner-info">
+        <span class="banner-id">{{ t.identifier }}</span>
+        <h1 class="banner-name">{{ t.name }} {{ t.firstName || '' }}</h1>
+        <div class="banner-meta">
+          <span class="type-pill" [class]="t.type?.toLowerCase()">
+            {{ t.type === 'PHYSICAL_PERSON' ? 'Personne physique' : 'Personne morale' }}
+          </span>
+          @if (t.town) { <span class="meta-loc">{{ t.town }}, {{ t.country }}</span> }
+        </div>
+      </div>
+      <div class="banner-kpis">
+        <div class="mini-kpi"><span class="k-val">{{ policies().length }}</span><span class="k-lab">Contrats</span></div>
+        <div class="mini-kpi"><span class="k-val">{{ activeCount() }}</span><span class="k-lab">Actifs</span></div>
+        <div class="mini-kpi"><span class="k-val">{{ totalPremium() | number }} €</span><span class="k-lab">Prime totale</span></div>
+      </div>
+    </header>
+
+    <div class="detail-grid">
+
+      <!-- IDENTITY -->
+      <section class="card">
+        <div class="card-head">
+          <span class="head-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2"/><path d="M15 12h2"/><path d="M7 16h10"/></svg>
+          </span>
+          <h3>Identité</h3>
+        </div>
+        <div class="field-grid">
+          <div class="field"><label>Identifiant</label><span>{{ t.identifier }}</span></div>
+          <div class="field"><label>Type</label><span>{{ t.type === 'PHYSICAL_PERSON' ? 'Personne physique' : 'Personne morale' }}</span></div>
+          @if (t.type === 'PHYSICAL_PERSON') {
+            <div class="field"><label>Nom</label><span>{{ t.name }}</span></div>
+            <div class="field"><label>Prénom</label><span>{{ t.firstName || '—' }}</span></div>
+            <div class="field"><label>Date de naissance</label><span>{{ t.birthDate || '—' }}</span></div>
+            <div class="field"><label>Genre</label><span>{{ t.gender === 'MALE' ? 'Homme' : (t.gender === 'FEMALE' ? 'Femme' : '—') }}</span></div>
+          } @else {
+            <div class="field"><label>Raison sociale</label><span>{{ t.name }}</span></div>
+            <div class="field"><label>N° national</label><span>{{ t.nationalIdentifier || '—' }}</span></div>
+            <div class="field"><label>Forme juridique</label><span>{{ t.legalForm || '—' }}</span></div>
+            <div class="field"><label>Pays d'immatriculation</label><span>{{ t.nationalIdentifierCountry || '—' }}</span></div>
+          }
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="card">
+        <div class="card-head">
+          <span class="head-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.5 17c.6-1.6 2-2.4 3.5-2.4s2.9.8 3.5 2.4"/><path d="M15 9h4"/><path d="M15 13h4"/></svg>
+          </span>
+          <h3>Coordonnées</h3>
+        </div>
+        <ul class="contact-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+            <div><label>Email</label><span>{{ t.email || '—' }}</span></div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <div><label>Téléphone</label><span>{{ t.phone || '—' }}</span></div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div><label>Adresse</label><span>{{ addressLine(t) }}</span></div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- CONTRACTS -->
+      <section class="card full">
+        <div class="card-head">
+          <span class="head-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/></svg>
+          </span>
+          <h3>Contrats souscrits</h3>
+          <span class="count">{{ policies().length }}</span>
+        </div>
+        <div class="table-scroll">
+          <table class="tp-contracts">
+            <thead>
+              <tr>
+                <th>N° Police</th>
+                <th>Produit</th>
+                <th>Statut</th>
+                <th>Prime annuelle</th>
+                <th>Date d'effet</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of policies(); track p.id) {
+                <tr class="clickable" (click)="openPolicy(p)">
+                  <td class="c-id">#{{ p.policyNumber }}</td>
+                  <td class="c-strong">{{ p.product?.name }}</td>
+                  <td><span class="s-badge" [class]="p.status?.toLowerCase()">{{ p.status }}</span></td>
+                  <td class="c-strong">{{ p.annualPremium | number }} €</td>
+                  <td>{{ p.effectiveDate }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="empty-line">Aucun contrat pour ce tiers.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  } @else {
+    <div class="loader">Chargement du tiers…</div>
+  }
+</div>

@@ -1,0 +1,114 @@
+<div class="detail-page">
+  @if (policy(); as p) {
+
+    <header class="pd-header">
+      <div class="pd-top">
+        <button class="back-link" (click)="goBack()">← Retour à la liste</button>
+        <div class="pd-actions">
+          <span [ngClass]="['chip', badgeCls(p.status)]"><span class="dot"></span>{{ statusFr(p.status) }}</span>
+          <button class="btn-edit" (click)="onEdit()">Modifier</button>
+        </div>
+      </div>
+      <h1 class="pd-title">Contrat #{{ p.policyNumber }}</h1>
+      <p class="pd-sub">{{ p.product?.name }} · souscrit par {{ p.holder?.name }} {{ p.holder?.firstName }}</p>
+    </header>
+
+    <div class="pd-grid">
+
+      <!-- Informations générales -->
+      <section class="card">
+        <h3 class="sec-title"><span class="sq"></span>Informations générales</h3>
+        <div class="info-grid">
+          <div class="field"><label>Produit</label><span>{{ p.product?.name || 'N/A' }}</span></div>
+          <div class="field"><label>Date d'effet</label><span>{{ fmtDate(p.effectiveDate) }}</span></div>
+          <div class="field"><label>Expiration</label><span>{{ p.termDate ? fmtDate(p.termDate) : 'N/A' }}</span></div>
+          <div class="field"><label>Prime annuelle</label><span class="accent">{{ fmtMoney0(p.annualPremium) }} €</span></div>
+          <div class="field"><label>Mode de paiement</label><span>{{ payModeFr(p.paymentMode) }}</span></div>
+        </div>
+      </section>
+
+      <!-- Souscripteur principal -->
+      <section class="card">
+        <h3 class="sec-title"><span class="sq"></span>Souscripteur principal</h3>
+        <div class="holder">
+          <div class="avatar">{{ p.holder?.name?.[0] }}</div>
+          <div class="holder-name">{{ p.holder?.name }} {{ p.holder?.firstName }}</div>
+          <div class="holder-line">{{ p.holder?.email || '—' }}</div>
+          <div class="holder-line">{{ p.holder?.phone || '—' }}</div>
+          <div class="holder-line">{{ p.holder?.town }}{{ p.holder?.country ? ', ' + p.holder?.country : '' }}</div>
+        </div>
+      </section>
+
+      <!-- Intervenants et rôles -->
+      <section class="card full">
+        <h3 class="sec-title"><span class="sq"></span>Intervenants et rôles</h3>
+        <div class="roles">
+          @for (role of roles(); track role.id) {
+            <div class="role-card">
+              <span class="role-pill">{{ roleFr(role.roleType) }}</span>
+              <div class="role-name">{{ role.thirdParty?.name }} {{ role.thirdParty?.firstName }}</div>
+              <div class="role-mail">{{ role.thirdParty?.email || '—' }}</div>
+            </div>
+          } @empty {
+            <p class="empty">Aucun autre intervenant sur ce contrat.</p>
+          }
+        </div>
+      </section>
+
+      <!-- Garanties souscrites -->
+      <section class="card full">
+        <h3 class="sec-title"><span class="sq"></span>Garanties souscrites</h3>
+        <div class="cov-list">
+          @for (c of coverages(); track c.id) {
+            <div class="cov-row">
+              <div class="cov-left">
+                <span class="cov-label">{{ c.label }}</span>
+                <span class="cov-type">{{ covTypeFr(c.coverageType) }}</span>
+              </div>
+              <div class="cov-right">
+                <span class="cov-cap">{{ fmtMoney0(c.capital) }} €</span>
+                <span [ngClass]="['chip', badgeCls(c.status)]"><span class="dot"></span>{{ c.status }}</span>
+              </div>
+            </div>
+          } @empty {
+            <p class="empty">Aucune garantie trouvée.</p>
+          }
+        </div>
+      </section>
+
+      <!-- Historique des factures -->
+      <section class="card full">
+        <h3 class="sec-title"><span class="sq"></span>Historique des factures</h3>
+        <div class="table-scroll">
+          <table class="bills">
+            <thead>
+              <tr>
+                <th>N° Facture</th>
+                <th>Date d'échéance</th>
+                <th>Montant</th>
+                <th>Montant payé</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of bills(); track b.id) {
+                <tr>
+                  <td class="b-id">{{ b.identifier }}</td>
+                  <td>{{ fmtDate(b.effectiveDate) }}</td>
+                  <td class="b-amt">{{ fmtMoney2(b.billAmount) }} €</td>
+                  <td class="b-paid">{{ fmtMoney2(b.paidAmount) }} €</td>
+                  <td><span [ngClass]="['chip', badgeCls(b.status)]">{{ billFr(b.status) }}</span></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="empty">Aucune facture associée.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  } @else {
+    <div class="loader">Chargement du contrat…</div>
+  }
+</div>

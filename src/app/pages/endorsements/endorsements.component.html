@@ -1,0 +1,103 @@
+<div class="end-page">
+
+  <!-- HEADER -->
+  <div class="end-header">
+    <div class="title-block">
+      <span class="eyebrow">Modifications Contractuelles</span>
+      <h1>📑 Historique des Avenants</h1>
+      <p class="sub">Suivi des modifications et mouvements contractuels</p>
+    </div>
+    <div class="count-chip">
+      <span class="num">{{ filteredEndorsements().length }}</span>
+      <span class="txt">Dossiers</span>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="insight-strip">
+    <div class="insight-card">
+      <div class="ic-icon indigo">📋</div>
+      <div class="ic-data">
+        <label>Dossiers en attente</label>
+        <span class="ic-value">{{ pendingCount() }}</span>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="ic-icon emerald">📊</div>
+      <div class="ic-data">
+        <label>Volume des mouvements</label>
+        <span class="ic-value">{{ totalVolume() | number:'1.0-0' }} €</span>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="ic-icon violet">🚀</div>
+      <div class="ic-data">
+        <label>Statut Système</label>
+        <span class="ic-value" style="font-size:16px;color:#7c3aed;">Opérationnel</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text"
+             class="search-box"
+             [ngModel]="searchText()"
+             (ngModelChange)="updateSearch($event)"
+             placeholder="Rechercher par ID, n° de police, type..." />
+    </div>
+    <select class="filter-box"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="updateStatus($event)">
+      <option value="">Tous les statuts</option>
+      <option value="VALIDATED">Validé</option>
+      <option value="PENDING">En attente</option>
+      <option value="REJECTED">Rejeté</option>
+    </select>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-box">
+    <table class="end-table">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Police</th>
+          <th>Type d'Avenant</th>
+          <th>Sous-Type</th>
+          <th>Montant Brut</th>
+          <th>Date d'Effet</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (e of filteredEndorsements(); track e.id) {
+          <tr>
+            <td><span class="td-id">{{ e.identifier }}</span></td>
+            <td><span class="td-ref">#{{ e.policyNumber }}</span></td>
+            <td>
+              <span class="td-type">{{ e.endorsementType }}</span>
+            </td>
+            <td><span class="td-sub">{{ e.endorsementSubType.replace('_', ' ') }}</span></td>
+            <td>
+              @if (e.grossAmount) {
+                <span class="td-amount">{{ e.grossAmount | number:'1.2-2' }} €</span>
+              } @else {
+                <span class="td-no-amt">N/A</span>
+              }
+            </td>
+            <td>{{ e.effectiveDate }}</td>
+            <td>
+              <span class="s-badge" [class]="e.status.toLowerCase()">{{ e.status }}</span>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="no-results">Aucun avenant trouvé.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>

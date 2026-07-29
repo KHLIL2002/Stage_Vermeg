@@ -1,0 +1,399 @@
+/* ============================================================
+   SOLIFE PLATFORM — PROFILE PAGE SCSS
+   ============================================================ */
+
+.profile-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #6366f1;
+    margin-bottom: 8px;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #4f46e5;
+    }
+  }
+
+  .page-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: #64748b;
+    margin: 4px 0 0 0;
+  }
+
+  .kc-account-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #ffffff;
+      border-color: #6366f1;
+      color: #6366f1;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+  }
+}
+
+/* User Hero Banner Card */
+.user-hero-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  border-radius: 20px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
+  color: #ffffff;
+
+  .user-avatar-large {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    flex-shrink: 0;
+  }
+
+  .user-hero-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .name-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .user-full-name {
+        font-family: 'Sora', sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0;
+      }
+
+      .role-pill {
+        font-size: 11px;
+        font-weight: 700;
+        background: rgba(99, 102, 241, 0.25);
+        color: #a5b4fc;
+        border: 1px solid rgba(99, 102, 241, 0.4);
+        padding: 3px 10px;
+        border-radius: 50px;
+      }
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 13px;
+      color: #94a3b8;
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        &.status-item {
+          color: #34d399;
+          font-weight: 600;
+
+          .status-dot {
+            width: 7px;
+            height: 7px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Profile Grid */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.profile-card, .roles-section-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+
+    &.blue-bg { background: #eef2ff; }
+    &.purple-bg { background: #f5f3ff; }
+    &.green-bg { background: #f0fdf4; }
+  }
+
+  .card-title-text {
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+    p {
+      font-size: 12.5px;
+      color: #64748b;
+      margin: 2px 0 0 0;
+    }
+  }
+}
+
+/* Alerts */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+
+  &.alert-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+  }
+
+  &.alert-danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+  }
+}
+
+/* Forms */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 11px 14px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 13.5px;
+    color: #0f172a;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+
+    &.read-only {
+      background: #f8fafc;
+      color: #64748b;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
+  }
+
+  .input-pw-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .btn-toggle-pw {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      opacity: 0.6;
+
+      &:hover { opacity: 1; }
+    }
+  }
+
+  .field-hint {
+    font-size: 11px;
+    color: #94a3b8;
+  }
+}
+
+.form-actions {
+  margin-top: 8px;
+
+  .btn-save {
+    width: 100%;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &.btn-purple {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+
+      &:hover:not(:disabled) {
+        box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+      }
+    }
+  }
+}
+
+/* Roles Section */
+.roles-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  .role-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      background: #6366f1;
+      border-radius: 50%;
+    }
+  }
+
+  .empty-roles {
+    font-size: 13px;
+    color: #94a3b8;
+    font-style: italic;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-hero-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
+}

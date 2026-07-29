@@ -1,0 +1,758 @@
+<div class="dashboard-wrap">
+
+  <!-- PAGE HEADER -->
+  <div class="dash-header">
+    <div>
+      <h1 class="dash-title">{{ 'dash.title' | transloco }}</h1>
+    </div>
+
+    
+  </div>
+
+  <!-- CATEGORY TAB NAVIGATION BAR -->
+  <div class="dash-tabs-bar">
+    <button class="dash-tab" [class.active]="activeTab() === 'overview'" (click)="setTab('overview')">
+      <span class="tab-icon">📊</span>
+      <span class="tab-label">{{ 'tabs.overview' | transloco }}</span>
+    </button>
+
+    <button class="dash-tab" [class.active]="activeTab() === 'policies'" (click)="setTab('policies')">
+      <span class="tab-icon">📄</span>
+      <span class="tab-label">{{ 'tabs.policies' | transloco }}</span>
+      <span class="tab-badge">{{ filteredPolicies().length }}</span>
+    </button>
+
+    <button class="dash-tab" [class.active]="activeTab() === 'third-parties'" (click)="setTab('third-parties')">
+      <span class="tab-icon">👥</span>
+      <span class="tab-label">{{ 'tabs.thirdParties' | transloco }}</span>
+      <span class="tab-badge">{{ filteredThirdParties().length }}</span>
+    </button>
+
+    <button class="dash-tab" [class.active]="activeTab() === 'bills'" (click)="setTab('bills')">
+      <span class="tab-icon">💶</span>
+      <span class="tab-label">{{ 'tabs.billing' | transloco }}</span>
+      <span class="tab-badge">{{ filteredBills().length }}</span>
+    </button>
+
+    <button class="dash-tab" [class.active]="activeTab() === 'coverages'" (click)="setTab('coverages')">
+      <span class="tab-icon">🛡️</span>
+      <span class="tab-label">{{ 'tabs.coverages' | transloco }}</span>
+      <span class="tab-badge">{{ filteredCoverages().length }}</span>
+    </button>
+
+    <button class="dash-tab" [class.active]="activeTab() === 'endorsements'" (click)="setTab('endorsements')">
+      <span class="tab-icon">📑</span>
+      <span class="tab-label">{{ 'tabs.endorsements' | transloco }}</span>
+      <span class="tab-badge">{{ filteredEndorsements().length }}</span>
+    </button>
+  </div>
+
+
+  <!-- ====================================================
+       TAB 1: VUE SYNTHÉTIQUE (OVERVIEW)
+       ==================================================== -->
+  @if (activeTab() === 'overview') {
+
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card pro-card">
+        <div class="kpi-icon-wrap gold">💶</div>
+        <div class="kpi-body">
+          <p class="kpi-label">{{ 'ov.businessVolume' | transloco }}</p>
+          <p class="kpi-value">{{ totalPremium() | number:'1.0-0' }} €</p>
+          <span class="kpi-badge up">↑ 12% {{ 'ov.thisMonth' | transloco }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card pro-card">
+        <div class="kpi-icon-wrap green">📈</div>
+        <div class="kpi-body">
+          <p class="kpi-label">{{ 'ov.activeContracts' | transloco }}</p>
+          <p class="kpi-value">{{ activeCount() }} / {{ policies().length }}</p>
+          <span class="kpi-badge neutral">{{ (activeCount() / (policies().length || 1) * 100) | number:'1.0-0' }}% {{ 'ov.ofPortfolio' | transloco }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card pro-card">
+        <div class="kpi-icon-wrap purple">👥</div>
+        <div class="kpi-body">
+          <p class="kpi-label">{{ 'ov.clientBase' | transloco }}</p>
+          <p class="kpi-value">{{ thirdParties().length }}</p>
+          <span class="kpi-badge neutral">{{ physicalCount() }} {{ 'ov.phys' | transloco }} · {{ legalCount() }} {{ 'ov.legal' | transloco }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card pro-card">
+        <div class="kpi-icon-wrap blue">⚠️</div>
+        <div class="kpi-body">
+          <p class="kpi-label">{{ 'ov.unpaidBilling' | transloco }}</p>
+          <p class="kpi-value">{{ totalUnpaid() | number:'1.0-0' }} €</p>
+          <span class="kpi-badge down">{{ 'ov.reminderRequired' | transloco }}</span>
+        </div>
+      </div>
+
+      <!-- NEW PRO KPIs -->
+      <div class="kpi-card pro-card">
+        <div class="kpi-icon-wrap emerald">🛡️</div>
+        <div class="kpi-body">
+          <p class="kpi-label">{{ 'ov.activeCapital' | transloco }}</p>
+          <p class="kpi-value">{{ totalCapital() | number:'1.0-0' }} €</p>
+          <span class="kpi-badge up">{{ 'ov.totalCoverage' | transloco }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card pro-card">
+        <div class="kpi-icon-wrap indigo">📊</div>
+        <div class="kpi-body">
+          <p class="kpi-label">{{ 'ov.collectionRate' | transloco }}</p>
+          <p class="kpi-value">{{ collectionRate() | number:'1.1-1' }}%</p>
+          <span class="kpi-badge neutral">{{ 'ov.onTotalBilled' | transloco }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card pro-card">
+        <div class="kpi-icon-wrap amber">📑</div>
+        <div class="kpi-body">
+          <p class="kpi-label">{{ 'ov.endorsementsVolume' | transloco }}</p>
+          <p class="kpi-value">{{ totalEndorsementsVolume() | number:'1.0-0' }} €</p>
+          <span class="kpi-badge up">{{ 'ov.activeModifications' | transloco }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card pro-card">
+        <div class="kpi-icon-wrap violet">⭐</div>
+        <div class="kpi-body">
+          <p class="kpi-label">{{ 'ov.averagePremium' | transloco }}</p>
+          <p class="kpi-value">{{ avgPremium() | number:'1.0-0' }} €</p>
+          <span class="kpi-badge neutral">{{ 'ov.perContract' | transloco }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <div class="chart-card large-chart pro-card">
+        <div class="chart-card-top">
+          <div>
+            <h3 class="chart-title">{{ 'ov.byProduct' | transloco }}</h3>
+            <p class="chart-sub">{{ 'ov.productDistribution' | transloco }}</p>
+          </div>
+          <span class="chart-pill">{{ policies().length }} {{ 'ov.policiesWord' | transloco }}</span>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas #productChart></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card small-chart pro-card">
+        <div class="chart-card-top">
+          <div>
+            <h3 class="chart-title">{{ 'ov.portfolioHealth' | transloco }}</h3>
+            <p class="chart-sub">{{ 'ov.subscriptionStatuses' | transloco }}</p>
+          </div>
+          <span class="chart-pill">{{ activeCount() }} {{ 'ov.activeWord' | transloco }}</span>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas #statusChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY ROW -->
+    <div class="activity-row">
+      <div class="activity-card pro-card">
+        <div class="activity-header">
+          <h3>{{ 'ov.recentSubscriptions' | transloco }}</h3>
+          <button class="btn-text" (click)="setTab('policies')">{{ 'ov.viewAll' | transloco }} &rarr;</button>
+        </div>
+        <div class="table-wrap">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>{{ 'cols.policyNo' | transloco }}</th>
+                <th>{{ 'cols.holder' | transloco }}</th>
+                <th>{{ 'cols.status' | transloco }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of recentPolicies(); track p.id) {
+                <tr (click)="selectPolicy(p)" class="clickable">
+                  <td class="cell-id">#{{ p.policyNumber }}</td>
+                  <td class="cell-strong">{{ p.holder?.name }} {{ p.holder?.firstName }}</td>
+                  <td><span class="s-badge" [class]="p.status.toLowerCase()">{{ p.status }}</span></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="table-empty">{{ 'ov.noRecentSubs' | transloco }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="activity-card pro-card">
+        <div class="activity-header">
+          <h3>{{ 'ov.recentBills' | transloco }}</h3>
+          <button class="btn-text" (click)="setTab('bills')">{{ 'ov.viewAll' | transloco }} &rarr;</button>
+        </div>
+        <div class="table-wrap">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>{{ 'cols.billNo' | transloco }}</th>
+                <th>{{ 'cols.amount' | transloco }}</th>
+                <th>{{ 'cols.status' | transloco }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of recentBills(); track b.id) {
+                <tr>
+                  <td class="cell-id">{{ b.identifier }}</td>
+                  <td class="cell-strong">{{ b.billAmount | number:'1.0-0' }} {{ b.currency }}</td>
+                  <td><span class="s-badge" [class]="b.status.toLowerCase()">{{ b.status }}</span></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="table-empty">{{ 'ov.noRecentBills' | transloco }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+
+  <!-- ====================================================
+       TAB 2: POLICES (DEDICATED MODEL SEARCH & TABLE)
+       ==================================================== -->
+  @if (activeTab() === 'policies') {
+
+    <!-- DEDICATED POLICIES SEARCH CONTROL PANEL -->
+    <div class="search-panel-card">
+      <div class="search-panel-top">
+        <div class="search-main-wrap">
+          <span class="search-ico">🔍</span>
+          <input type="text"
+                 class="search-main-input"
+                 [ngModel]="policySearch()"
+                 (ngModelChange)="policySearch.set($event)"
+                 [placeholder]="'dash.searchPolicies' | transloco" />
+        </div>
+
+        @if (policyFilterCount() > 0) {
+          <div class="filter-actions">
+            <span class="active-count-pill">{{ policyFilterCount() }} {{ 'dash.filters' | transloco }}</span>
+            <button class="btn-reset" (click)="resetPolicySearch()">✕ {{ 'dash.clear' | transloco }}</button>
+          </div>
+        }
+        <a routerLink="/subscription" class="btn-new" style="white-space: nowrap;">
+          <span class="plus">＋</span> {{ 'dash.addNew' | transloco }}
+        </a>
+      </div>
+      
+
+      
+      <!-- POLICIES SPECIFIC VARIABLES GRID -->
+      <div class="filter-variables-grid">
+        <div class="filter-field">
+          <label>{{ 'filters.statusContract' | transloco }}</label>
+          <p-dropdown [options]="optStatusPolicy()" optionLabel="label" optionValue="value"
+                      [ngModel]="policyStatus()" (ngModelChange)="policyStatus.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.product' | transloco }}</label>
+          <p-dropdown [options]="productOptions()" optionLabel="label" optionValue="value"
+                      [ngModel]="policyProduct()" (ngModelChange)="policyProduct.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.paymentMode' | transloco }}</label>
+          <p-dropdown [options]="optPaymentMode()" optionLabel="label" optionValue="value"
+                      [ngModel]="policyPaymentMode()" (ngModelChange)="policyPaymentMode.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.premiumMin' | transloco }}</label>
+          <input type="number" class="filter-input-num" [ngModel]="policyMinPremium()" (ngModelChange)="policyMinPremium.set($event)" placeholder="ex: 1000" />
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.premiumMax' | transloco }}</label>
+          <input type="number" class="filter-input-num" [ngModel]="policyMaxPremium()" (ngModelChange)="policyMaxPremium.set($event)" placeholder="ex: 8000" />
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.effectiveYear' | transloco }}</label>
+          <p-dropdown [options]="policyYearOptions()" optionLabel="label" optionValue="value"
+                      [ngModel]="policyYear()" (ngModelChange)="policyYear.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- POLICIES TABLE -->
+    <div class="table-box">
+      <table class="pol-table">
+        <thead>
+          <tr>
+            <th>{{ 'cols.policyNo' | transloco }}</th>
+            <th>{{ 'cols.product' | transloco }}</th>
+            <th>{{ 'cols.status' | transloco }}</th>
+            <th>{{ 'cols.holder' | transloco }}</th>
+            <th>{{ 'cols.annualPremium' | transloco }}</th>
+            <th>{{ 'cols.paymentMode' | transloco }}</th>
+            <th>{{ 'cols.effectiveDate' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of pagedPolicies(); track p.id) {
+            <tr (click)="selectPolicy(p)" class="clickable">
+              <td><span class="td-id">#{{ p.policyNumber }}</span></td>
+              <td><span class="td-product">{{ p.product?.name }}</span></td>
+              <td>
+                <span class="s-badge" [class]="p.status.toLowerCase()">{{ p.status }}</span>
+              </td>
+              <td>{{ p.holder?.name }} {{ p.holder?.firstName }}</td>
+              <td><span class="td-amount">{{ p.annualPremium | number:'1.0-0' }} €</span></td>
+              <td>{{ p.paymentMode || 'ANNUAL' }}</td>
+              <td>{{ p.effectiveDate }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="no-results">{{ 'dash.emptyPolicies' | transloco }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (policyTotalPages() > 1) {
+      <div class="pagination">
+        <button class="pg-btn" [disabled]="policyPage() === 1" (click)="policyPage.set(policyPage() - 1)">‹</button>
+        @for (pg of pageList(policyPage(), policyTotalPages()); track $index) {
+          @if (pg === '…') {
+            <span class="pg-ellipsis">…</span>
+          } @else {
+            <button class="pg-num" [class.active]="pg === policyPage()" (click)="policyPage.set(+pg)">{{ pg }}</button>
+          }
+        }
+        <button class="pg-btn" [disabled]="policyPage() === policyTotalPages()" (click)="policyPage.set(policyPage() + 1)">›</button>
+        <span class="pg-info">{{ filteredPolicies().length }} {{ 'dash.results' | transloco }}</span>
+      </div>
+    }
+  }
+
+
+  <!-- ====================================================
+       TAB 3: TIERS (DEDICATED MODEL SEARCH & TABLE)
+       ==================================================== -->
+  @if (activeTab() === 'third-parties') {
+
+    <!-- DEDICATED TIERS SEARCH CONTROL PANEL -->
+    <div class="search-panel-card">
+      <div class="search-panel-top">
+        <div class="search-main-wrap">
+          <span class="search-ico">🔍</span>
+          <input type="text"
+                 class="search-main-input"
+                 [ngModel]="tpSearch()"
+                 (ngModelChange)="tpSearch.set($event)"
+                 [placeholder]="'dash.searchTiers' | transloco" />
+        </div>
+
+        <a routerLink="/add-third-party" class="btn-new" style="white-space: nowrap;">
+          <span class="plus">＋</span> {{ 'dash.addNew' | transloco }}
+        </a>
+
+        @if (tpFilterCount() > 0) {
+          <div class="filter-actions">
+            <span class="active-count-pill">{{ tpFilterCount() }} {{ 'dash.filters' | transloco }}</span>
+            <button class="btn-reset" (click)="resetTpSearch()">✕ {{ 'dash.clear' | transloco }}</button>
+          </div>
+        }
+      </div>
+
+      <!-- TIERS SPECIFIC VARIABLES GRID -->
+      <div class="filter-variables-grid">
+        <div class="filter-field">
+          <label>{{ 'filters.tierType' | transloco }}</label>
+          <p-dropdown [options]="optTpType()" optionLabel="label" optionValue="value"
+                      [ngModel]="tpType()" (ngModelChange)="tpType.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.cityLocation' | transloco }}</label>
+          <input type="text" class="filter-input-num" [ngModel]="tpTown()" (ngModelChange)="tpTown.set($event)" [placeholder]="'dash.cityExample' | transloco" />
+        </div>
+      </div>
+    </div>
+
+    <!-- TIERS TABLE -->
+    <div class="table-box">
+      <table class="tp-table">
+        <thead>
+          <tr>
+            <th>{{ 'cols.identifier' | transloco }}</th>
+            <th>{{ 'cols.fullName' | transloco }}</th>
+            <th>{{ 'cols.type' | transloco }}</th>
+            <th>{{ 'cols.location' | transloco }}</th>
+            <th>{{ 'cols.contact' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tp of pagedThirdParties(); track tp.id) {
+            <tr class="clickable" (click)="selectTier(tp)">
+              <td><span class="td-id">{{ tp.identifier }}</span></td>
+              <td>
+                <span class="td-name-main">{{ tp.name }} {{ tp.firstName || '' }}</span>
+              </td>
+              <td>
+                <span class="type-pill" [class]="tp.type.toLowerCase()">
+                  {{ (tp.type === 'PHYSICAL_PERSON' ? 'dash.individual' : 'dash.company') | transloco }}
+                </span>
+              </td>
+              <td>
+                <span class="td-town">{{ tp.town }}</span>
+              </td>
+              <td class="td-contact">
+                <div>📧 {{ tp.email }}</div>
+                <div>📞 {{ tp.phone }}</div>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="no-results">{{ 'dash.emptyTiers' | transloco }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (tpTotalPages() > 1) {
+      <div class="pagination">
+        <button class="pg-btn" [disabled]="tpPage() === 1" (click)="tpPage.set(tpPage() - 1)">‹</button>
+        @for (pg of pageList(tpPage(), tpTotalPages()); track $index) {
+          @if (pg === '…') {
+            <span class="pg-ellipsis">…</span>
+          } @else {
+            <button class="pg-num" [class.active]="pg === tpPage()" (click)="tpPage.set(+pg)">{{ pg }}</button>
+          }
+        }
+        <button class="pg-btn" [disabled]="tpPage() === tpTotalPages()" (click)="tpPage.set(tpPage() + 1)">›</button>
+        <span class="pg-info">{{ filteredThirdParties().length }} {{ 'dash.results' | transloco }}</span>
+      </div>
+    }
+  }
+
+
+  <!-- ====================================================
+       TAB 4: FACTURES (DEDICATED MODEL SEARCH & TABLE)
+       ==================================================== -->
+  @if (activeTab() === 'bills') {
+
+    <!-- DEDICATED BILLS SEARCH CONTROL PANEL -->
+    <div class="search-panel-card">
+      <div class="search-panel-top">
+        <div class="search-main-wrap">
+          <span class="search-ico">🔍</span>
+          <input type="text"
+                 class="search-main-input"
+                 [ngModel]="billSearch()"
+                 (ngModelChange)="billSearch.set($event)"
+                 [placeholder]="'dash.searchBills' | transloco" />
+        </div>
+
+        @if (billFilterCount() > 0) {
+          <div class="filter-actions">
+            <span class="active-count-pill">{{ billFilterCount() }} {{ 'dash.filters' | transloco }}</span>
+            <button class="btn-reset" (click)="resetBillSearch()">✕ {{ 'dash.clear' | transloco }}</button>
+          </div>
+        }
+      </div>
+
+      <!-- BILLS SPECIFIC VARIABLES GRID -->
+      <div class="filter-variables-grid">
+        <div class="filter-field">
+          <label>{{ 'filters.billStatus' | transloco }}</label>
+          <p-dropdown [options]="optStatusBill()" optionLabel="label" optionValue="value"
+                      [ngModel]="billStatus()" (ngModelChange)="billStatus.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.amountMin' | transloco }}</label>
+          <input type="number" class="filter-input-num" [ngModel]="billMinAmount()" (ngModelChange)="billMinAmount.set($event)" placeholder="ex: 200" />
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.amountMax' | transloco }}</label>
+          <input type="number" class="filter-input-num" [ngModel]="billMaxAmount()" (ngModelChange)="billMaxAmount.set($event)" placeholder="ex: 5000" />
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.dueYear' | transloco }}</label>
+          <p-dropdown [options]="billYearOptions()" optionLabel="label" optionValue="value"
+                      [ngModel]="billYear()" (ngModelChange)="billYear.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+      </div>
+    </div>
+
+    <!-- BILLS TABLE -->
+    <div class="table-box">
+      <table class="bills-table">
+        <thead>
+          <tr>
+            <th>{{ 'cols.billNo' | transloco }}</th>
+            <th>{{ 'cols.policyRef' | transloco }}</th>
+            <th>{{ 'cols.totalAmount' | transloco }}</th>
+            <th>{{ 'cols.paidAmount' | transloco }}</th>
+            <th>{{ 'cols.dueDate' | transloco }}</th>
+            <th>{{ 'cols.status' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (b of pagedBills(); track b.id) {
+            <tr>
+              <td><span class="td-id">{{ b.identifier }}</span></td>
+              <td><span class="td-ref">#{{ b.policyNumber }}</span></td>
+              <td><span class="td-amount">{{ b.billAmount | number:'1.2-2' }} {{ b.currency }}</span></td>
+              <td class="td-paid" [class.partial]="b.paidAmount > 0 && b.paidAmount < b.billAmount">
+                {{ b.paidAmount | number:'1.2-2' }} {{ b.currency }}
+              </td>
+              <td>{{ b.effectiveDate }}</td>
+              <td>
+                <span class="s-badge" [class]="b.status.toLowerCase()">{{ b.status }}</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="no-results">{{ 'dash.emptyBills' | transloco }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (billTotalPages() > 1) {
+      <div class="pagination">
+        <button class="pg-btn" [disabled]="billPage() === 1" (click)="billPage.set(billPage() - 1)">‹</button>
+        @for (pg of pageList(billPage(), billTotalPages()); track $index) {
+          @if (pg === '…') {
+            <span class="pg-ellipsis">…</span>
+          } @else {
+            <button class="pg-num" [class.active]="pg === billPage()" (click)="billPage.set(+pg)">{{ pg }}</button>
+          }
+        }
+        <button class="pg-btn" [disabled]="billPage() === billTotalPages()" (click)="billPage.set(billPage() + 1)">›</button>
+        <span class="pg-info">{{ filteredBills().length }} {{ 'dash.results' | transloco }}</span>
+      </div>
+    }
+  }
+
+
+  <!-- ====================================================
+       TAB 5: GARANTIES (DEDICATED MODEL SEARCH & TABLE)
+       ==================================================== -->
+  @if (activeTab() === 'coverages') {
+
+    <!-- DEDICATED COVERAGES SEARCH CONTROL PANEL -->
+    <div class="search-panel-card">
+      <div class="search-panel-top">
+        <div class="search-main-wrap">
+          <span class="search-ico">🔍</span>
+          <input type="text"
+                 class="search-main-input"
+                 [ngModel]="coverageSearch()"
+                 (ngModelChange)="coverageSearch.set($event)"
+                 [placeholder]="'dash.searchCoverages' | transloco" />
+        </div>
+
+        @if (coverageFilterCount() > 0) {
+          <div class="filter-actions">
+            <span class="active-count-pill">{{ coverageFilterCount() }} {{ 'dash.filters' | transloco }}</span>
+            <button class="btn-reset" (click)="resetCoverageSearch()">✕ {{ 'dash.clear' | transloco }}</button>
+          </div>
+        }
+      </div>
+
+      <!-- COVERAGES SPECIFIC VARIABLES GRID -->
+      <div class="filter-variables-grid">
+        <div class="filter-field">
+          <label>{{ 'filters.coverageType' | transloco }}</label>
+          <p-dropdown [options]="optCoverageType()" optionLabel="label" optionValue="value"
+                      [ngModel]="coverageType()" (ngModelChange)="coverageType.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.coverageStatus' | transloco }}</label>
+          <p-dropdown [options]="optStatusCoverage()" optionLabel="label" optionValue="value"
+                      [ngModel]="coverageStatus()" (ngModelChange)="coverageStatus.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.capitalMin' | transloco }}</label>
+          <input type="number" class="filter-input-num" [ngModel]="coverageMinCapital()" (ngModelChange)="coverageMinCapital.set($event)" placeholder="ex: 10000" />
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.capitalMax' | transloco }}</label>
+          <input type="number" class="filter-input-num" [ngModel]="coverageMaxCapital()" (ngModelChange)="coverageMaxCapital.set($event)" placeholder="ex: 500000" />
+        </div>
+      </div>
+    </div>
+
+    <!-- COVERAGES TABLE -->
+    <div class="table-box">
+      <table class="cov-table">
+        <thead>
+          <tr>
+            <th>{{ 'cols.covId' | transloco }}</th>
+            <th>{{ 'cols.covLabel' | transloco }}</th>
+            <th>{{ 'cols.type' | transloco }}</th>
+            <th>{{ 'cols.insuredCapital' | transloco }}</th>
+            <th>{{ 'cols.status' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of pagedCoverages(); track c.id) {
+            <tr>
+              <td><span class="td-id">{{ c.identifier }}</span></td>
+              <td><span class="td-label">{{ c.label }}</span></td>
+              <td><span class="type-tag">{{ c.coverageType }}</span></td>
+              <td><span class="td-amount">{{ c.capital | number:'1.0-0' }} €</span></td>
+              <td>
+                <span class="s-badge" [class]="c.status.toLowerCase()">{{ c.status }}</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="no-results">{{ 'dash.emptyCoverages' | transloco }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (coverageTotalPages() > 1) {
+      <div class="pagination">
+        <button class="pg-btn" [disabled]="coveragePage() === 1" (click)="coveragePage.set(coveragePage() - 1)">‹</button>
+        @for (pg of pageList(coveragePage(), coverageTotalPages()); track $index) {
+          @if (pg === '…') {
+            <span class="pg-ellipsis">…</span>
+          } @else {
+            <button class="pg-num" [class.active]="pg === coveragePage()" (click)="coveragePage.set(+pg)">{{ pg }}</button>
+          }
+        }
+        <button class="pg-btn" [disabled]="coveragePage() === coverageTotalPages()" (click)="coveragePage.set(coveragePage() + 1)">›</button>
+        <span class="pg-info">{{ filteredCoverages().length }} {{ 'dash.results' | transloco }}</span>
+      </div>
+    }
+  }
+
+
+  <!-- ====================================================
+       TAB 6: AVENANTS (DEDICATED MODEL SEARCH & TABLE)
+       ==================================================== -->
+  @if (activeTab() === 'endorsements') {
+
+    <!-- DEDICATED ENDORSEMENTS SEARCH CONTROL PANEL -->
+    <div class="search-panel-card">
+      <div class="search-panel-top">
+        <div class="search-main-wrap">
+          <span class="search-ico">🔍</span>
+          <input type="text"
+                 class="search-main-input"
+                 [ngModel]="endorsementSearch()"
+                 (ngModelChange)="endorsementSearch.set($event)"
+                 [placeholder]="'dash.searchEndorsements' | transloco" />
+        </div>
+
+        @if (endorsementFilterCount() > 0) {
+          <div class="filter-actions">
+            <span class="active-count-pill">{{ endorsementFilterCount() }} {{ 'dash.filters' | transloco }}</span>
+            <button class="btn-reset" (click)="resetEndorsementSearch()">✕ {{ 'dash.clear' | transloco }}</button>
+          </div>
+        }
+      </div>
+
+      <!-- ENDORSEMENTS SPECIFIC VARIABLES GRID -->
+      <div class="filter-variables-grid">
+        <div class="filter-field">
+          <label>{{ 'filters.fileStatus' | transloco }}</label>
+          <p-dropdown [options]="optStatusEndorsement()" optionLabel="label" optionValue="value"
+                      [ngModel]="endorsementStatus()" (ngModelChange)="endorsementStatus.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.endorsementType' | transloco }}</label>
+          <p-dropdown [options]="optEndorsementType()" optionLabel="label" optionValue="value"
+                      [ngModel]="endorsementType()" (ngModelChange)="endorsementType.set($event)"
+                      styleClass="filter-dd" appendTo="body"></p-dropdown>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.grossMin' | transloco }}</label>
+          <input type="number" class="filter-input-num" [ngModel]="endorsementMinAmount()" (ngModelChange)="endorsementMinAmount.set($event)" placeholder="ex: 100" />
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'filters.grossMax' | transloco }}</label>
+          <input type="number" class="filter-input-num" [ngModel]="endorsementMaxAmount()" (ngModelChange)="endorsementMaxAmount.set($event)" placeholder="ex: 10000" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ENDORSEMENTS TABLE -->
+    <div class="table-box">
+      <table class="end-table">
+        <thead>
+          <tr>
+            <th>{{ 'cols.reference' | transloco }}</th>
+            <th>{{ 'cols.policy' | transloco }}</th>
+            <th>{{ 'filters.endorsementType' | transloco }}</th>
+            <th>{{ 'cols.subType' | transloco }}</th>
+            <th>{{ 'cols.grossAmount' | transloco }}</th>
+            <th>{{ 'cols.effectiveDate' | transloco }}</th>
+            <th>{{ 'cols.status' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of pagedEndorsements(); track e.id) {
+            <tr>
+              <td><span class="td-id">{{ e.identifier }}</span></td>
+              <td><span class="td-ref">#{{ e.policyNumber }}</span></td>
+              <td><span class="td-type">{{ e.endorsementType }}</span></td>
+              <td><span class="td-sub">{{ e.endorsementSubType?.replace('_', ' ') }}</span></td>
+              <td>
+                @if (e.grossAmount) {
+                  <span class="td-amount">{{ e.grossAmount | number:'1.2-2' }} €</span>
+                } @else {
+                  <span class="td-no-amt">N/A</span>
+                }
+              </td>
+              <td>{{ e.effectiveDate }}</td>
+              <td>
+                <span class="s-badge" [class]="e.status.toLowerCase()">{{ e.status }}</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="no-results">{{ 'dash.emptyEndorsements' | transloco }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (endorsementTotalPages() > 1) {
+      <div class="pagination">
+        <button class="pg-btn" [disabled]="endorsementPage() === 1" (click)="endorsementPage.set(endorsementPage() - 1)">‹</button>
+        @for (pg of pageList(endorsementPage(), endorsementTotalPages()); track $index) {
+          @if (pg === '…') {
+            <span class="pg-ellipsis">…</span>
+          } @else {
+            <button class="pg-num" [class.active]="pg === endorsementPage()" (click)="endorsementPage.set(+pg)">{{ pg }}</button>
+          }
+        }
+        <button class="pg-btn" [disabled]="endorsementPage() === endorsementTotalPages()" (click)="endorsementPage.set(endorsementPage() + 1)">›</button>
+        <span class="pg-info">{{ filteredEndorsements().length }} {{ 'dash.results' | transloco }}</span>
+      </div>
+    }
+  }
+
+</div>
