@@ -1,18 +1,23 @@
 package com.example.Stage.Llm.Model;
 
+import java.util.List;
+
 public record LlmMessage(
         String role,
-        String content
+        String content,
+        List<LlmToolCall> toolCalls,
+        String toolCallId
 ) {
-    public static LlmMessage user(String content) {
-        return new LlmMessage("user", content);
-    }
-
+    // Méthodes statiques pratiques
     public static LlmMessage system(String content) {
-        return new LlmMessage("system", content);
+        return new LlmMessage("system", content, null, null);
     }
 
-    public static LlmMessage assistant(String content) {
-        return new LlmMessage("assistant", content);
+    public static LlmMessage user(String content) {
+        return new LlmMessage("user", content, null, null);
+    }
+
+    public static LlmMessage toolResult(String toolCallId, String content) {
+        return new LlmMessage("tool_result", content, null, toolCallId);
     }
 }
